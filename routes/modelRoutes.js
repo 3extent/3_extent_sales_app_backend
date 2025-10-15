@@ -6,11 +6,11 @@ const Model = require('../models/Model');
 // GET /api/models?name=SAMSUNG
 router.get('/', async (req, res) => {
   try {
-    const { name } = req.query;
+    const { brand_name } = req.query;
 
     let filter = {};
-    if (name) {
-      filter.name = name;
+    if (brand_name) {
+      filter.name = brand_name;
     }
     const models = await Model.find(filter);
     res.json(models);
