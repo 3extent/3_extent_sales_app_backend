@@ -12,15 +12,54 @@ router.get('/', async (req, res) => {
     let filter = {};
 
 
-    let brandDoc = await Brand.find({ name: brand_name });
+    let brandDoc = await Brand.findOne({ name: brand_name });
+    console.log("brandDoc", brandDoc)
 
     if (brandDoc) {
       filter.brand = brandDoc._id;
     }
-    const models = await Model.find(filter);
+    console.log("filter", filter)
+
+    const models = await Model.find(filter).populate('brand');
+    console.log("models", models)
+
     res.json(models);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Get single model by id
+// GET /api/models/:id
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!id || !require('mongoose').Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid model id' });
+    }
+
+    const model = await Model.findById(id)
+      .populate('brand')
+      .populate('enquiryQuestions.defect')
+      .populate('bodyDefects.defect')
+      .populate('brokenScratchDefects.defect')
+      .populate('screenDefects.defect')
+      .populate('scarctchesBodyDefect.defect')
+      .populate('devicePanelMissing.defect')
+      .populate('functionalDefects.defect')
+      .populate('availableAccessories.defect');
+
+    if (!model) {
+      return res.status(404).json({ error: 'Model not found' });
+    }
+
+    res.json(model);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
