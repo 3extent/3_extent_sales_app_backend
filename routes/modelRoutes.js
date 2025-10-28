@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Model = require('../models/Model');
 const Brand = require('../models/Brand');
+const Defect=require('../models/Defect')
 
 // Get all models with filters
 // GET /api/models?name=SAMSUNG
@@ -20,7 +21,15 @@ router.get('/', async (req, res) => {
     }
     console.log("filter", filter)
 
-    const models = await Model.find(filter).populate('brand');
+    const models = await Model.find(filter).populate('brand')
+      .populate('enquiryQuestions.defect')
+      .populate('bodyDefects.defect')
+      .populate('brokenScratchDefects.defect')
+      .populate('screenDefects.defect')
+      .populate('scarctchesBodyDefect.defect')
+      .populate('devicePanelMissing.defect')
+      .populate('functionalDefects.defect')
+      .populate('availableAccessories.defect');
     console.log("models", models)
 
     res.json(models);
