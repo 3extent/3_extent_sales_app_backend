@@ -12,6 +12,7 @@ app.use(cors());
 app.use('/api/users', require('./../routes/userRoutes'));
 app.use('/api/brands', require('./../routes/brandRoutes'));
 app.use('/api/models', require('./../routes/modelRoutes'));
+app.use('/api/defects', require('./../routes/defectRoutes'));
 
 // Database connection helper for serverless environments
 let isConnected = false;

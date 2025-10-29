@@ -7,7 +7,8 @@ const defectSchema = new mongoose.Schema({
   description: String,
   image: String,
   created_at: { type: Number, default: moment.utc().valueOf() },
-  updated_at: { type: Number, default: moment.utc().valueOf() }
+  updated_at: { type: Number, default: moment.utc().valueOf() },
+  type: String
 });
 
 module.exports = mongoose.model('Defect', defectSchema);
