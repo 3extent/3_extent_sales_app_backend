@@ -4,12 +4,13 @@ const User = require('../models/User')
 const Activity = require('../models/Activity');
 
 // POST /api/activity/
-router.post('/login', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { contact_number, model, defects, final_price } = req.body;
     const user = await User.findOne({ contact_number });
     if (user) {
       // Create a new activity (excluding contact_number)
+      
       const activity = new Activity({
         model,
         defects,
