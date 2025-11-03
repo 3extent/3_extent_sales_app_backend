@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User')
 const Activity = require('../models/Activity');
 const Model = require('../models/Model');
+const Defect = require('../models/Defect');
 
 // POST /api/activity/
 router.post('/', async (req, res) => {
@@ -13,13 +14,17 @@ router.post('/', async (req, res) => {
       // Create a new activity (excluding contact_number)
 
       // Load the model and populate all relevant defect arrays
-      const existingModel = await Model.findById(model)
+      const existingModel = await Model.findById(model);
+
+      const existingDefects = defects.map(async (singleDefect) => {
+        return await Defect.findOne({ name: singleDefect })._id
+      })
 
       if (existingModel) {
 
         const activity = new Activity({
           model: existingModel._id,
-          defects,
+          defects: existingDefects,
           final_price,
         });
 
