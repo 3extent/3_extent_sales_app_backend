@@ -13,7 +13,7 @@ app.use('/api/users', require('./../routes/userRoutes'));
 app.use('/api/brands', require('./../routes/brandRoutes'));
 app.use('/api/models', require('./../routes/modelRoutes'));
 app.use('/api/defects', require('./../routes/defectRoutes'));
-app.use('/api/activitities',require('./../routes/activityRoutes'))
+app.use('/api/activity',require('./../routes/activityRoutes'))
 
 // Database connection helper for serverless environments
 let isConnected = false;
