@@ -8,18 +8,12 @@ const Defect = require('../models/Defect')
 // GET /api/models?name=SAMSUNG
 router.get('/', async (req, res) => {
   try {
-    const { brand_name } = req.query;
+    const { name } = req.query;
 
     let filter = {};
-
-
-    let brandDoc = await Brand.findOne({ name: brand_name });
-    console.log("brandDoc", brandDoc)
-
-    if (brandDoc) {
-      filter.brand = brandDoc._id;
+    if (name) {
+      filter.name = name;
     }
-    console.log("filter", filter)
 
     const models = await Model.find(filter).populate('brand')
       .populate('enquiryQuestions.defect')
