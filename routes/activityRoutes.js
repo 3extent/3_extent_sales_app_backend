@@ -9,6 +9,7 @@ const Defect = require('../models/Defect');
 router.post('/', async (req, res) => {
   try {
     const { contact_number, model, defects, final_price } = req.body;
+
     const user = await User.findOne({ contact_number });
     if (user) {
       // Create a new activity (excluding contact_number)
@@ -16,9 +17,13 @@ router.post('/', async (req, res) => {
       // Load the model and populate all relevant defect arrays
       const existingModel = await Model.findById(model);
 
-      const existingDefects = defects.map(async (singleDefect) => {
-        return await Defect.findOne({ name: singleDefect })._id
-      })
+      // Suppose defects is an array of strings (names)
+      const existingDefects = await Promise.all(
+        defects.map(async (singleDefect) => {
+          const def = await Defect.findOne({ name: singleDefect });
+          return def ? def._id : null;  // or handle not found appropriately
+        })
+      );
 
       if (existingModel) {
 
@@ -47,6 +52,20 @@ router.post('/', async (req, res) => {
 
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+
+// GET /api/activity/
+router.get('/', async (req, res) => {
+  try {
+    const activities = await Activity.find()
+      .populate('model')         // populate model details
+      .populate('defects');      // populate defects array
+    res.json(activities);
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
