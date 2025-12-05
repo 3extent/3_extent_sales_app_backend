@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
 
     let filter = {};
     if (name) {
-      filter.name = name;
+      filter.name = { $regex: name, $options: 'i' };
     }
     const brands = await Brand.find(filter);
     res.json(brands);

@@ -5,16 +5,23 @@ const Brand = require('../models/Brand');
 const Defect = require('../models/Defect')
 
 // Get all models with filters
-// GET /api/models?name=SAMSUNG
+// GET /api/models?brand_name=SAMSUNG&name=S24
 router.get('/', async (req, res) => {
   try {
-    const { name } = req.query;
+    const { brand_name, name } = req.query;
 
     let filter = {};
     if (name) {
-      filter.name = name;
+      filter.name = { $regex: name, $options: 'i' };;
     }
+    if (brand_name) {
+      let brandDoc = await Brand.findOne({ name: { $regex: brand_name, $options: 'i' } });
 
+      if (brandDoc) {
+        filter.brand = brandDoc._id;
+      }
+    }
+    console.log("filter", filter)
     const models = await Model.find(filter).populate('brand')
       .populate('enquiryQuestions.defect')
       .populate('bodyDefects.defect')
