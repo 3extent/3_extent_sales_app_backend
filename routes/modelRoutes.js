@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
       .populate('bodyDefects.defect')
       .populate('brokenScratchDefects.defect')
       .populate('screenDefects.defect')
-      .populate('scarctchesBodyDefect.defect')
+      .populate('scrachesBodyDefect.defect')
       .populate('devicePanelMissing.defect')
       .populate('functionalDefects.defect')
       .populate('availableAccessories.defect');
@@ -51,7 +51,7 @@ router.get('/:id', async (req, res) => {
       .populate('bodyDefects.defect')
       .populate('brokenScratchDefects.defect')
       .populate('screenDefects.defect')
-      .populate('scarctchesBodyDefect.defect')
+      .populate('scrachesBodyDefect.defect')
       .populate('devicePanelMissing.defect')
       .populate('functionalDefects.defect')
       .populate('availableAccessories.defect');
@@ -97,7 +97,7 @@ router.post('/calculate-defects-price', async (req, res) => {
       model.bodyDefects,
       model.brokenScratchDefects,
       model.screenDefects,
-      model.scarctchesBodyDefect,
+      model.scrachesBodyDefect,
       model.devicePanelMissing,
       model.functionalDefects,
       model.availableAccessories
