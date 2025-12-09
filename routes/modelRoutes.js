@@ -166,6 +166,39 @@ router.post('/calculate-defects-price', async (req, res) => {
   }
 });
 
+// PUT /api/models/:id
+router.put('/:id', async (req, res) => {
+  try {
+    const modelId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(modelId)) {
+      return res.status(400).json({ error: "Invalid model ID" });
+    }
+
+    // Prepare update object
+    const updateData = { ...req.body, updated_at: moment.utc().valueOf() };
+
+    // Update the model
+    const updatedModel = await Model.findByIdAndUpdate(
+      modelId,
+      { $set: updateData },
+      { new: true } // return updated result
+    );
+
+    if (!updatedModel) {
+      return res.status(404).json({ error: "Model not found" });
+    }
+
+    res.json({
+      message: "Model updated successfully",
+      data: updatedModel
+    });
+
+  } catch (err) {
+    console.error("Error updating model:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 
 module.exports = router;
