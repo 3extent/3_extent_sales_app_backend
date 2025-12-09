@@ -82,7 +82,7 @@ router.post('/calculate-defects-price', async (req, res) => {
       .populate('bodyDefects.defect')
       .populate('brokenScratchDefects.defect')
       .populate('screenDefects.defect')
-      .populate('scarctchesBodyDefect.defect')
+      .populate('scrachesBodyDefect.defect')
       .populate('devicePanelMissing.defect')
       .populate('functionalDefects.defect')
       .populate('availableAccessories.defect');
