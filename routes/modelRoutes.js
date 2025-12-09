@@ -3,6 +3,7 @@ const router = express.Router();
 const Model = require('../models/Model');
 const Brand = require('../models/Brand');
 const Defect = require('../models/Defect')
+const moment = require('moment');
 
 // Get all models with filters
 // GET /api/models?brand_name=SAMSUNG&name=S24
@@ -44,12 +45,6 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Validate ObjectId
-    if (!id || !require('mongoose').Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid model id' });
-    }
-
     const model = await Model.findById(id)
       .populate('brand')
       .populate('enquiryQuestions.defect')
@@ -170,10 +165,6 @@ router.post('/calculate-defects-price', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const modelId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(modelId)) {
-      return res.status(400).json({ error: "Invalid model ID" });
-    }
 
     // Prepare update object
     const updateData = { ...req.body, updated_at: moment.utc().valueOf() };
