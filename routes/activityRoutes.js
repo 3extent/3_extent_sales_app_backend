@@ -8,7 +8,7 @@ const Defect = require('../models/Defect');
 // POST /api/activity/
 router.post('/', async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price } = req.body;
+    const { contact_number, model, defects, final_price, ramStorage } = req.body;
 
     const user = await User.findOne({ contact_number });
     if (user) {
@@ -16,6 +16,10 @@ router.post('/', async (req, res) => {
 
       // Load the model and populate all relevant defect arrays
       const existingModel = await Model.findById(model);
+
+      if (!existingModel.ramStorageComb.includes(ramStorage)) {
+        return res.status(400).json({ message: 'RAM/Storage combination for this model does not found' });
+      }
 
       // Suppose defects is an array of strings (names)
       const existingDefects = await Promise.all(
@@ -31,6 +35,8 @@ router.post('/', async (req, res) => {
           model: existingModel._id,
           defects: existingDefects,
           final_price,
+          ramStorage,
+          user: user._id
         });
 
         await activity.save();
