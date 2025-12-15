@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
           model: existingModel._id,
           defects: existingDefects,
           final_price,
-          ramStorage,
+          selected_ram_storage: ramStorage,
           user: user._id
         });
 
@@ -68,7 +68,7 @@ router.get('/', async (req, res) => {
   try {
     const activities = await Activity.find()
       .populate('model')         // populate model details
-      .populate('defects');      // populate defects array
+      .populate('defects').populate('user');      // populate defects array
     res.json(activities);
   } catch (err) {
     console.error('Error fetching activities:', err);

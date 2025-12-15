@@ -6,6 +6,7 @@ const activitySchema = new mongoose.Schema({
   defects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   final_price: String,
+  selected_ram_storage: String,
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() }
 });
