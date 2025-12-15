@@ -17,7 +17,8 @@ router.post('/', async (req, res) => {
       // Load the model and populate all relevant defect arrays
       const existingModel = await Model.findById(model);
 
-      if (!existingModel.ramStorageComb.includes(ramStorage)) {
+      let ramStorageComb = existingModel.ramStorageComb.map((singleRamStorage) => singleRamStorage.ramStorage)
+      if (!ramStorageComb.includes(ramStorage)) {
         return res.status(400).json({ message: 'RAM/Storage combination for this model does not found' });
       }
 
