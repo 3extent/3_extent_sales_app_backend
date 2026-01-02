@@ -8,7 +8,7 @@ const Defect = require('../models/Defect');
 // POST /api/activity/
 router.post('/', async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price, ramStorage } = req.body;
+    const { contact_number, model, defects, final_price, add_on_amount, ramStorage } = req.body;
 
     const user = await User.findOne({ contact_number });
     if (user) {
@@ -36,6 +36,8 @@ router.post('/', async (req, res) => {
           model: existingModel._id,
           defects: existingDefects,
           final_price,
+          add_on_amount,
+          total_amount: parseInt(final_price) + parseInt(add_on_amount),
           selected_ram_storage: ramStorage,
           user: user._id
         });
