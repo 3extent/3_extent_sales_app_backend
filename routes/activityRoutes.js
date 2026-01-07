@@ -8,7 +8,7 @@ const Defect = require('../models/Defect');
 // POST /api/activity/
 router.post('/', async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price, ramStorage } = req.body;
+    const { contact_number, model, defects, final_price, add_on_amount, ramStorage } = req.body;
 
     const user = await User.findOne({ contact_number });
     if (user) {
@@ -36,6 +36,8 @@ router.post('/', async (req, res) => {
           model: existingModel._id,
           defects: existingDefects,
           final_price,
+          add_on_amount,
+          total_amount: parseInt(final_price) + parseInt(add_on_amount),
           selected_ram_storage: ramStorage,
           user: user._id
         });
@@ -66,7 +68,27 @@ router.post('/', async (req, res) => {
 // GET /api/activity/
 router.get('/', async (req, res) => {
   try {
-    const activities = await Activity.find()
+    const { contact_number, model_name, selected_ram_storage } = req.query;
+    let filter = {};
+
+    if (selected_ram_storage) {
+      filter.selected_ram_storage = selected_ram_storage;
+    }
+
+    if (model_name) {
+      let modelDoc = await Model.findOne({ name: { $regex: model_name, $options: 'i' } });
+      if (modelDoc) {
+        filter.model = modelDoc._id;
+      }
+    }
+    if (contact_number) {
+      let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } });
+      if (userDoc) {
+        filter.user = userDoc._id;
+      }
+    }
+
+    const activities = await Activity.find(filter)
       .populate('model')         // populate model details
       .populate('defects').populate('user');      // populate defects array
     res.json(activities);
