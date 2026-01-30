@@ -1,6 +1,6 @@
-import { Model } from "mongoose";
+import Model from "../Models/Model.mjs";
 import User from "../Users/User.mjs";
-import { Activity } from "react";
+import Activity from "./Activity.mjs";
 import Defect from "../Defects/Defect.mjs";
 
 export const getActivitiess = async (req, res) => {

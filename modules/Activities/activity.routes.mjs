@@ -1,5 +1,5 @@
 import express from 'express';
-import { getActivitiess, addActivity } from './defect.controller.mjs';
+import { getActivitiess, addActivity } from './activity.controller.mjs';
 
 const router = express.Router();
 
