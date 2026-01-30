@@ -2,10 +2,10 @@ import User from './User.mjs';
 
 import twilio from 'twilio';
 import otpGenerator from 'otp-generator';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const accountSid = 'AC20c3bdcc57a1c80233efe22a83b0348a';
-const authToken = '9899ef36d2192ac0b63a2778803aaad3';
-const client = twilio(accountSid, authToken);
+const client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
 export const loginUser = async (req, res) => {
   try {
