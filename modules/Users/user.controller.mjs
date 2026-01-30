@@ -1,5 +1,12 @@
 import User from './User.mjs';
 
+import twilio from 'twilio';
+import otpGenerator from 'otp-generator';
+
+const accountSid = 'AC20c3bdcc57a1c80233efe22a83b0348a';
+const authToken = '9899ef36d2192ac0b63a2778803aaad3';
+const client = twilio(accountSid, authToken);
+
 export const loginUser = async (req, res) => {
   try {
     const { contact_number, password } = req.body;
@@ -17,5 +24,58 @@ export const loginUser = async (req, res) => {
     return res.json(user);
   } catch (err) {
     return res.status(400).json({ error: err.message });
+  }
+};
+
+export const sendOtp = async (req, res) => {
+  try {
+    const { contact_number } = req.body;
+
+    if (!contact_number) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+
+    // Generate OTP
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false
+    });
+
+    const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
+
+    let user = await User.findOne({ contact_number });
+    let isNew = false;
+
+    if (!user) {
+      // 🆕 Create new user
+      user = await User.create({
+        contact_number,
+        otp,
+        otp_expires_at: otpExpiry
+      });
+      isNew = true;
+    } else {
+      // ♻️ Existing user → update OTP
+      user.otp = otp;
+      user.otp_expires_at = otpExpiry;
+      await user.save();
+    }
+
+    // Send OTP
+    await client.messages.create({
+      to: contact_number,
+      from: '+16419343401',
+      body: `OTP for 3_Extent is ${otp}`
+    });
+
+    res.json({
+      message: 'OTP sent successfully',
+      isNew
+    });
+
+  } catch (err) {
+    console.error('Send OTP Error:', err);
+    res.status(500).json({ message: 'Failed to send OTP' });
   }
 };

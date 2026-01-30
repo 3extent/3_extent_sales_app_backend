@@ -5,7 +5,11 @@ const userSchema = new mongoose.Schema({
   name: String,
   contact_number: String,
   email_id: String,
-  password: String,
+
+  // 🔐 OTP fields
+  otp: String,
+  otp_expires_at: Number,
+  
   address: String,
   role: String,
   activities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }],
