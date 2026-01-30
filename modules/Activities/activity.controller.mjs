@@ -1,5 +1,7 @@
-import Brand from './Brand.mjs';
-import Defect from './Defect.mjs';
+import { Model } from "mongoose";
+import User from "../Users/User.mjs";
+import { Activity } from "react";
+import Defect from "../Defects/Defect.mjs";
 
 export const getActivitiess = async (req, res) => {
   try {

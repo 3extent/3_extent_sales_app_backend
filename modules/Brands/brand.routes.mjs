@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDefects } from './defect.controller.mjs';
+import { addBrands, getBrands } from './brand.controller.mjs';
 
 const router = express.Router();
 

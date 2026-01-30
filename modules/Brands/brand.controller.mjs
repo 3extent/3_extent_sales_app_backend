@@ -1,5 +1,5 @@
 import Brand from './Brand.mjs';
-import Defect from './Defect.mjs';
+import Defect from '../Defects/Defect.mjs';
 
 export const getBrands = async (req, res) => {
   try {
