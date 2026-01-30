@@ -2,11 +2,13 @@ import User from './User.mjs';
 
 import twilio from 'twilio';
 import otpGenerator from 'otp-generator';
+import dotenv from 'dotenv';
 
-const client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+dotenv.config();
 
 export const loginUser = async (req, res) => {
   try {
+    console.log('req.body: ', req.body);
     const { contact_number, password } = req.body;
 
     const user = await User.findOne({ contact_number });
@@ -26,7 +28,9 @@ export const loginUser = async (req, res) => {
 };
 
 export const sendOtp = async (req, res) => {
+  console.log('req: ', req);
   try {
+    console.log('req.body: ', req.body);
     const { contact_number } = req.body;
 
     if (!contact_number) {
@@ -61,6 +65,9 @@ export const sendOtp = async (req, res) => {
     }
 
     // Send OTP
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    console.log('process.env.ACCOUNT_SID, process.env.AUTH_TOKEN: ', process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
     await client.messages.create({
       to: contact_number,
       from: '+16419343401',
