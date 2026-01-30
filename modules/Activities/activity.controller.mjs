@@ -1,12 +1,39 @@
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User')
-const Activity = require('../models/Activity');
-const Model = require('../models/Model');
-const Defect = require('../models/Defect');
+import Brand from './Brand.mjs';
+import Defect from './Defect.mjs';
 
-// POST /api/activity/
-router.post('/', async (req, res) => {
+export const getActivitiess = async (req, res) => {
+  try {
+    const { contact_number, model_name, selected_ram_storage } = req.query;
+    let filter = {};
+
+    if (selected_ram_storage) {
+      filter.selected_ram_storage = selected_ram_storage;
+    }
+
+    if (model_name) {
+      let modelDoc = await Model.findOne({ name: { $regex: model_name, $options: 'i' } });
+      if (modelDoc) {
+        filter.model = modelDoc._id;
+      }
+    }
+    if (contact_number) {
+      let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } });
+      if (userDoc) {
+        filter.user = userDoc._id;
+      }
+    }
+
+    const activities = await Activity.find(filter)
+      .populate('model')         // populate model details
+      .populate('defects').populate('user');      // populate defects array
+    res.json(activities);
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const addActivity = async (req, res) => {
   try {
     const { contact_number, model, defects, final_price, add_on_amount, ramStorage } = req.body;
 
@@ -62,40 +89,4 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-});
-
-
-// GET /api/activity/
-router.get('/', async (req, res) => {
-  try {
-    const { contact_number, model_name, selected_ram_storage } = req.query;
-    let filter = {};
-
-    if (selected_ram_storage) {
-      filter.selected_ram_storage = selected_ram_storage;
-    }
-
-    if (model_name) {
-      let modelDoc = await Model.findOne({ name: { $regex: model_name, $options: 'i' } });
-      if (modelDoc) {
-        filter.model = modelDoc._id;
-      }
-    }
-    if (contact_number) {
-      let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } });
-      if (userDoc) {
-        filter.user = userDoc._id;
-      }
-    }
-
-    const activities = await Activity.find(filter)
-      .populate('model')         // populate model details
-      .populate('defects').populate('user');      // populate defects array
-    res.json(activities);
-  } catch (err) {
-    console.error('Error fetching activities:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-module.exports = router;
+}

@@ -1,13 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const Model = require('../models/Model');
-const Brand = require('../models/Brand');
-const Defect = require('../models/Defect')
-const moment = require('moment');
+import Model from './Model.mjs';
+import Brand from '../Brands/Brand.mjs';
+import moment from 'moment';
 
-// Get all models with filters
-// GET /api/models?brand_name=SAMSUNG&name=S24
-router.get('/', async (req, res) => {
+/**
+ * GET /api/models
+ */
+export const getModels = async (req, res) => {
   try {
     const { brand_name, name } = req.query;
 
@@ -38,11 +36,12 @@ router.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Get single model by id
-// GET /api/models/:id
-router.get('/:id', async (req, res) => {
+/**
+ * GET /api/models/:id
+ */
+export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
     const model = await Model.findById(id)
@@ -64,12 +63,12 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-
-// POST /api/models/calculate-defects-price
-// Request body: { defects: ["defectName1", "defectName2", ...], modelId: "...", ramStorage: "..." }
-router.post('/calculate-defects-price', async (req, res) => {
+/**
+ * POST /api/models/calculate-defects-price
+ */
+export const calculateDefectsPrice = async (req, res) => {
   try {
     const { defects, modelId, ramStorage } = req.body;
     if (!Array.isArray(defects) || !modelId) {
@@ -159,10 +158,12 @@ router.post('/calculate-defects-price', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// PUT /api/models/:id
-router.put('/:id', async (req, res) => {
+/**
+ * PUT /api/models/:id
+ */
+export const updateModel = async (req, res) => {
   try {
     const modelId = req.params.id;
 
@@ -189,7 +190,4 @@ router.put('/:id', async (req, res) => {
     console.error("Error updating model:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-
-module.exports = router;
+};

@@ -1,6 +1,7 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+import mongoose from 'mongoose';
+import express from 'express';
+import cors from 'cors';
+
 
 const app = express();
 
@@ -9,11 +10,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 // Import routes
-app.use('/api/users', require('./../routes/userRoutes'));
-app.use('/api/brands', require('./../routes/brandRoutes'));
-app.use('/api/models', require('./../routes/modelRoutes'));
-app.use('/api/defects', require('./../routes/defectRoutes'));
-app.use('/api/activity',require('./../routes/activityRoutes'))
+app.use('/api/users', require('../modules/Users/user.routes.mjs'));
+app.use('/api/brands', require('../modules/Brands/brand.routes.mjs'));
+app.use('/api/models', require('../modules/Models/model.routes.mjs'));
+app.use('/api/defects', require('../modules/Defects/defect.routes.mjs'));
+app.use('/api/activity', require('../modules/Activities/activity.routes.mjs'))
 
 // Database connection helper for serverless environments
 let isConnected = false;

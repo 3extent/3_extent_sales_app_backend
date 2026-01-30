@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const moment = require('moment');
+import moment from "moment";
+import mongoose from "mongoose";
+
 
 const defectSchema = new mongoose.Schema({
   name: String,
@@ -11,4 +12,4 @@ const defectSchema = new mongoose.Schema({
   type: String
 });
 
-module.exports = mongoose.model('Defect', defectSchema);
+export default mongoose.model('Defect', defectSchema);

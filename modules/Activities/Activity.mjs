@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const moment = require('moment');
+import moment from "moment";
+import mongoose from "mongoose";
+
 
 const activitySchema = new mongoose.Schema({
   model: { type: mongoose.Schema.Types.ObjectId, ref: 'Model' },
@@ -13,4 +14,4 @@ const activitySchema = new mongoose.Schema({
   updated_at: { type: Number, default: moment.utc().valueOf() }
 });
 
-module.exports = mongoose.model('Activity', activitySchema);
+export default mongoose.model('Activity', activitySchema);

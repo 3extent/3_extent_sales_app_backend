@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const moment = require('moment');
+import moment from "moment";
+import mongoose from "mongoose";
+
 
 const brandSchema = new mongoose.Schema({
   name: String,
@@ -10,4 +11,4 @@ const brandSchema = new mongoose.Schema({
   updated_at: { type: Number, default: moment.utc().valueOf() }
 });
 
-module.exports = mongoose.model('Brand', brandSchema);
+export default mongoose.model('Brand', brandSchema);

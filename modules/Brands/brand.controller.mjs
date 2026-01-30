@@ -1,11 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const Brand = require('../models/Brand');
-const Defect = require('../models/Defect');
+import Brand from './Brand.mjs';
+import Defect from './Defect.mjs';
 
-// Get all brands with filters
-// GET /api/brands?name=SAMSUNG
-router.get('/', async (req, res) => {
+export const getBrands = async (req, res) => {
   try {
     const { name } = req.query;
 
@@ -18,11 +14,9 @@ router.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Add new brand in system
-// POST /api/brands
-router.post('/', async (req, res) => {
+export const addBrands = async (req, res) => {
   try {
     const { name, image, possibleRamStorageComb, defects } = req.body;
     const existingBrand = await Brand.findOne({ name });
@@ -49,6 +43,4 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-})
-
-module.exports = router;
+}

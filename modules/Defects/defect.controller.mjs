@@ -1,10 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const Defect = require('../models/Defect');
+import Defect from './Defect.mjs';
 
-// Get all defects with filters
-// GET /api/defects?type=
-router.get('/', async (req, res) => {
+export const getDefects = async (req, res) => {
   try {
     const { type } = req.query;
 
@@ -17,5 +13,4 @@ router.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
-module.exports = router;
+};
