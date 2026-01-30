@@ -2,9 +2,8 @@ import User from './User.mjs';
 
 import twilio from 'twilio';
 import otpGenerator from 'otp-generator';
-
-const accountSid = 'AC20c3bdcc57a1c80233efe22a83b0348a';
-const authToken = '9899ef36d2192ac0b63a2778803aaad3';
+const accountSid = "AC20c3bdcc57a1c80233efe22a83b0348a";
+const authToken = "9899ef36d2192ac0b63a2778803aaad3";
 const client = twilio(accountSid, authToken);
 
 export const loginUser = async (req, res) => {
@@ -28,11 +27,12 @@ export const loginUser = async (req, res) => {
 };
 
 export const sendOtp = async (req, res) => {
+  console.log('req: ', req);
   try {
     const { contact_number } = req.body;
 
     if (!contact_number) {
-      return res.status(400).json({ message: 'Phone number is required' });
+      // return res.status(400).json({ message: 'Phone number is required' });
     }
 
     // Generate OTP
@@ -44,23 +44,23 @@ export const sendOtp = async (req, res) => {
 
     const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
 
-    let user = await User.findOne({ contact_number });
+    // let user = await User.findOne({ contact_number });
     let isNew = false;
 
-    if (!user) {
-      // 🆕 Create new user
-      user = await User.create({
-        contact_number,
-        otp,
-        otp_expires_at: otpExpiry
-      });
-      isNew = true;
-    } else {
-      // ♻️ Existing user → update OTP
-      user.otp = otp;
-      user.otp_expires_at = otpExpiry;
-      await user.save();
-    }
+    // if (!user) {
+    //   // 🆕 Create new user
+    //   user = await User.create({
+    //     contact_number,
+    //     otp,
+    //     otp_expires_at: otpExpiry
+    //   });
+    //   isNew = true;
+    // } else {
+    //   // ♻️ Existing user → update OTP
+    //   user.otp = otp;
+    //   user.otp_expires_at = otpExpiry;
+    //   await user.save();
+    // }
 
     // Send OTP
     await client.messages.create({
@@ -69,13 +69,15 @@ export const sendOtp = async (req, res) => {
       body: `OTP for 3_Extent is ${otp}`
     });
 
-    res.json({
-      message: 'OTP sent successfully',
-      isNew
-    });
+    // res.json({
+    //   message: 'OTP sent successfully',
+    //   isNew
+    // });
 
   } catch (err) {
     console.error('Send OTP Error:', err);
-    res.status(500).json({ message: 'Failed to send OTP' });
+    // res.status(500).json({ message: 'Failed to send OTP' });
   }
 };
+
+await sendOtp({body:{contact_number:+917972586767}})
