@@ -8,8 +8,7 @@ dotenv.config();
 
 export const loginUser = async (req, res) => {
   try {
-    console.log('req.body: ', req.body);
-    const { contact_number, password } = req.body;
+    const { contact_number, otp } = req.body;
 
     const user = await User.findOne({ contact_number });
 
@@ -17,15 +16,42 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'User not found' });
     }
 
-    if (password !== user.password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    // OTP mismatch
+    if (otp !== user.otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
     }
 
-    return res.json(user);
+    // Expiry check using moment
+    if (!user.otp_expires_at || moment().valueOf() > user.otp_expires_at) {
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    // Clear OTP after successful login
+    user.otp = null;
+    user.otp_expires_at = null;
+
+    await user.save();
+
+    // Generate JWT
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role?._id,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "12h" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user,
+    });
   } catch (err) {
     return res.status(400).json({ error: err.message });
   }
 };
+
 
 export const sendOtp = async (req, res) => {
   console.log('req: ', req);
@@ -44,10 +70,10 @@ export const sendOtp = async (req, res) => {
       specialChars: false
     });
 
-    const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
+    const otpExpiry = moment().add(5, 'minutes').valueOf(); // 5 min
 
     let user = await User.findOne({ contact_number });
-    let isNew = false;
+    let is_new = false;
 
     if (!user) {
       // 🆕 Create new user
@@ -56,7 +82,7 @@ export const sendOtp = async (req, res) => {
         otp,
         otp_expires_at: otpExpiry
       });
-      isNew = true;
+      is_new = true;
     } else {
       // ♻️ Existing user → update OTP
       user.otp = otp;
@@ -76,7 +102,7 @@ export const sendOtp = async (req, res) => {
 
     res.json({
       message: 'OTP sent successfully',
-      isNew
+      is_new
     });
 
   } catch (err) {
