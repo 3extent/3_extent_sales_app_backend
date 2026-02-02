@@ -1,5 +1,6 @@
 import User from './User.mjs';
 import moment from "moment";
+import jwt from "jsonwebtoken";
 
 import twilio from 'twilio';
 import otpGenerator from 'otp-generator';
