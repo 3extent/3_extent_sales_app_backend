@@ -9,7 +9,7 @@ dotenv.config();
 
 export const loginUser = async (req, res) => {
   try {
-    const { contact_number, otp } = req.body;
+    const { contact_number, otp, is_new, name } = req.body;
 
     const user = await User.findOne({ contact_number });
 
@@ -30,6 +30,10 @@ export const loginUser = async (req, res) => {
     // Clear OTP after successful login
     user.otp = null;
     user.otp_expires_at = null;
+
+    if (is_new) {
+      user.name = name;
+    }
 
     await user.save();
 
@@ -55,7 +59,6 @@ export const loginUser = async (req, res) => {
 
 
 export const sendOtp = async (req, res) => {
-  console.log('req: ', req);
   try {
     // console.log('req.body: ', req.body);
     const { contact_number } = req.body;
@@ -95,7 +98,6 @@ export const sendOtp = async (req, res) => {
 
     // Send OTP
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    console.log('process.env.ACCOUNT_SID, process.env.AUTH_TOKEN: ', process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
     await client.messages.create({
       to: contact_number,
