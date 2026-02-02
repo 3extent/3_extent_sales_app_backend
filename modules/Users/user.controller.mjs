@@ -100,7 +100,7 @@ export const sendOtp = async (req, res) => {
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
     await client.messages.create({
-      to: contact_number,
+      to: `+91${contact_number}`,
       from: '+16419343401',
       body: `OTP for 3_Extent is ${otp}`
     });
