@@ -56,7 +56,7 @@ export const loginUser = async (req, res) => {
 export const sendOtp = async (req, res) => {
   console.log('req: ', req);
   try {
-    console.log('req.body: ', req.body);
+    // console.log('req.body: ', req.body);
     const { contact_number } = req.body;
 
     if (!contact_number) {
@@ -71,8 +71,10 @@ export const sendOtp = async (req, res) => {
     });
 
     const otpExpiry = moment().add(5, 'minutes').valueOf(); // 5 min
+    console.log('otpExpiry: ', otpExpiry);
 
     let user = await User.findOne({ contact_number });
+    console.log('user: ', user);
     let is_new = false;
 
     if (!user) {
