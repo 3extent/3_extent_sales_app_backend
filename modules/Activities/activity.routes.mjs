@@ -8,6 +8,6 @@ const router = express.Router();
 router.get('/', getActivitiess);
 
 // POST /api/activity/
-router.get('/', verifyToken, addActivity);
+router.post('/', verifyToken, addActivity);
 
 export default router;
