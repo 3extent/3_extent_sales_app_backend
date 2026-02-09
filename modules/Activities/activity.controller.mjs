@@ -5,7 +5,7 @@ import Defect from "../Defects/Defect.mjs";
 
 export const getActivitiess = async (req, res) => {
   try {
-    const { contact_number, model_name, selected_ram_storage } = req.query;
+    const { contact_number, model_name, selected_ram_storage, partner_name } = req.query;
     let filter = {};
 
     if (selected_ram_storage) {
@@ -22,6 +22,16 @@ export const getActivitiess = async (req, res) => {
       let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } });
       if (userDoc) {
         filter.user = userDoc._id;
+      }
+    }
+    if (partner_name) {
+      let partnerDoc = await Partner.findOne({ name: { $regex: partner_name, $options: 'i' } });
+      if (partnerDoc) {
+        const users = await User.find({ partner: partnerDoc._id });
+        const userIds = users.map(u => u._id);
+        if (userIds) {
+          filter.user = { $in: userIds };
+        }
       }
     }
 

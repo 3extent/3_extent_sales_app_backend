@@ -18,6 +18,7 @@ import userRoutes from '../modules/Users/user.routes.mjs';
 import brandRoutes from '../modules/Brands/brand.routes.mjs';
 import modelRoutes from '../modules/Models/model.routes.mjs';
 import defectRoutes from '../modules/Defects/defect.routes.mjs';
+import partnerRoutes from '../modules/Partners/partner.routes.mjs';
 
 
 
@@ -33,6 +34,8 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/defects', defectRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/partner', partnerRoutes);
+
 
 // Database connection helper (serverless-friendly)
 let isConnected = false;
