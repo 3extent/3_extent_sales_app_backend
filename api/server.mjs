@@ -34,7 +34,7 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/defects', defectRoutes);
 app.use('/api/activity', activityRoutes);
-app.use('/api/partner', partnerRoutes);
+app.use('/api/partners', partnerRoutes);
 
 
 // Database connection helper (serverless-friendly)
