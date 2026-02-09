@@ -9,9 +9,10 @@ const userSchema = new mongoose.Schema({
   // 🔐 OTP fields
   otp: String,
   otp_expires_at: Number,
-  
+
   address: String,
-  role: String,
+  role: { type: mongoose.Schema.Types.ObjectId, ref: 'UserRole' },
+  partner: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' },
   activities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }],
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() }

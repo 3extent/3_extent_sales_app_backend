@@ -2,12 +2,24 @@ import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
 
+
+import '../modules/UserRoles/UserRole.mjs';
+// import '../modules/Users/User.mjs';
+import '../modules/Partners/Partner.mjs';
+// import '../modules/Activities/Activity.mjs';
+// import '../modules/Brands/Brand.mjs';
+// import '../modules/Defects/Defect.mjs';
+// import '../modules/Models/Model.mjs';
+
+
 // Import routes (ESM way)
+import activityRoutes from '../modules/Activities/activity.routes.mjs';
 import userRoutes from '../modules/Users/user.routes.mjs';
 import brandRoutes from '../modules/Brands/brand.routes.mjs';
 import modelRoutes from '../modules/Models/model.routes.mjs';
 import defectRoutes from '../modules/Defects/defect.routes.mjs';
-import activityRoutes from '../modules/Activities/activity.routes.mjs';
+
+
 
 const app = express();
 

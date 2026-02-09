@@ -12,7 +12,10 @@ export const loginUser = async (req, res) => {
   try {
     const { contact_number, otp, is_new, name } = req.body;
 
-    const user = await User.findOne({ contact_number });
+    const user = await User.findOne({ contact_number })
+      .populate({ path: 'role' })
+    // .populate({ path: 'partner', select: 'name' });
+    console.log('user: ', user);
 
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
