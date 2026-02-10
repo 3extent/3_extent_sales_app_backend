@@ -19,7 +19,8 @@ export const getActivitiess = async (req, res) => {
       }
     }
     if (contact_number) {
-      let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } });
+      let userDoc = await User.findOne({ contact_number: { $regex: contact_number, $options: 'i' } }).populate({ path: 'role' })
+        .populate({ path: 'partner' });;
       if (userDoc) {
         filter.user = userDoc._id;
       }
@@ -27,7 +28,8 @@ export const getActivitiess = async (req, res) => {
     if (partner_name) {
       let partnerDoc = await Partner.findOne({ name: { $regex: partner_name, $options: 'i' } });
       if (partnerDoc) {
-        const users = await User.find({ partner: partnerDoc._id });
+        const users = await User.find({ partner: partnerDoc._id }).populate({ path: 'role' })
+          .populate({ path: 'partner' });;
         const userIds = users.map(u => u._id);
         if (userIds) {
           filter.user = { $in: userIds };
@@ -49,7 +51,8 @@ export const addActivity = async (req, res) => {
   try {
     const { contact_number, model, defects, final_price, add_on_amount, ramStorage } = req.body;
 
-    const user = await User.findOne({ contact_number });
+    const user = await User.findOne({ contact_number }).populate({ path: 'role' })
+      .populate({ path: 'partner' });;
     if (user) {
       // Create a new activity (excluding contact_number)
 

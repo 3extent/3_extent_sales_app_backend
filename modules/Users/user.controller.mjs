@@ -81,7 +81,8 @@ export const sendOtp = async (req, res) => {
     const otpExpiry = moment().add(5, 'minutes').valueOf(); // 5 min
     console.log('otpExpiry: ', otpExpiry);
 
-    let user = await User.findOne({ contact_number });
+    let user = await User.findOne({ contact_number }).populate({ path: 'role' })
+      .populate({ path: 'partner' });;
     console.log('user: ', user);
     let is_new = false;
 
