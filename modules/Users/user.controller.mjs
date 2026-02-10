@@ -14,7 +14,7 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ contact_number })
       .populate({ path: 'role' })
-    // .populate({ path: 'partner', select: 'name' });
+      .populate({ path: 'partner' });
     console.log('user: ', user);
 
     if (!user) {
