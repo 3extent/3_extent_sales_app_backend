@@ -160,6 +160,100 @@ export const calculateDefectsPrice = async (req, res) => {
   }
 };
 
+//POST api/models
+
+export const addModel = async (req, res) => {
+  try {
+    const {
+      name,
+      image,
+      ramStorageComb,
+      brand,
+      enquiryQuestions = [],
+      bodyDefects = [],
+      brokenScratchDefects = [],
+      screenDefects = [],
+      scrachesBodyDefect = [],
+      devicePanelMissing = [],
+      functionalDefects = [],
+      availableAccessories = [],
+    } = req.body;
+
+    if (!name || !brand) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and brand are required",
+      });
+    }
+
+    // 1 — Find brand by name
+    const brandDoc = await Brand.findOne({
+      name: { $regex: new RegExp("^" + brand + "$", "i") },
+    });
+
+    if (!brandDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Brand not found",
+      });
+    }
+
+    // 2 — Build model data directly
+    const modelData = {
+      name,
+      image,
+      ramStorageComb,
+      brand: brandDoc._id,
+      enquiryQuestions: enquiryQuestions.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      bodyDefects: bodyDefects.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      brokenScratchDefects: brokenScratchDefects.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      screenDefects: screenDefects.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      scrachesBodyDefect: scrachesBodyDefect.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      devicePanelMissing: devicePanelMissing.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      functionalDefects: functionalDefects.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+      availableAccessories: availableAccessories.map((d) => ({
+        defect: d.defectId,
+        price: d.price,
+      })),
+    };
+
+    // 3 — Save
+    const newModel = new Model(modelData);
+    const savedModel = await newModel.save();
+
+    res
+      .status(201)
+      .json({ success: true, message: "Model created", data: savedModel });
+  } catch (error) {
+    console.error("Add Model Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error" });
+  }
+};
+
+
 /**
  * PUT /api/models/:id
  */
