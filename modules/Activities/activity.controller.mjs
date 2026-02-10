@@ -49,7 +49,7 @@ export const getActivitiess = async (req, res) => {
         ]
       })
       .exec();
-      
+
     res.json(activities);
   } catch (err) {
     console.error('Error fetching activities:', err);
@@ -89,7 +89,7 @@ export const addActivity = async (req, res) => {
           defects: existingDefects,
           final_price,
           add_on_amount,
-          total_amount: parseInt(final_price) + parseInt(add_on_amount),
+          total_amount: Number(final_price) + Number(add_on_amount),
           selected_ram_storage: ramStorage,
           user: user._id
         });

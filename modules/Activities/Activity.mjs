@@ -6,9 +6,9 @@ const activitySchema = new mongoose.Schema({
   model: { type: mongoose.Schema.Types.ObjectId, ref: 'Model' },
   defects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  final_price: String,
-  add_on_amount: String,
-  total_amount: String,
+  final_price: { type: Number, default: 0 },
+  add_on_amount: { type: Number, default: 0 },
+  total_amount: { type: Number, default: 0 },
   selected_ram_storage: String,
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() }
