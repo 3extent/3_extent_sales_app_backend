@@ -29,7 +29,7 @@ export const getActivitiess = async (req, res) => {
       let partnerDoc = await Partner.findOne({ name: { $regex: partner_name, $options: 'i' } });
       if (partnerDoc) {
         const users = await User.find({ partner: partnerDoc._id }).populate({ path: 'role' })
-          .populate({ path: 'partner' });;
+          .populate({ path: 'partner' });
         const userIds = users.map(u => u._id);
         if (userIds) {
           filter.user = { $in: userIds };
@@ -38,8 +38,17 @@ export const getActivitiess = async (req, res) => {
     }
 
     const activities = await Activity.find(filter)
-      .populate('model')         // populate model details
-      .populate('defects').populate('user');      // populate defects array
+      .populate('model')     // populate model details
+      .populate('defects')   // populate defects
+      .populate({
+        path: 'user',        // populate the user field
+        populate: [
+          { path: 'role' },      // populate nested role on user
+          { path: 'partner' }    // populate nested partner on user
+        ]
+      })
+      .exec();
+      
     res.json(activities);
   } catch (err) {
     console.error('Error fetching activities:', err);
