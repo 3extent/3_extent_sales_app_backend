@@ -4,7 +4,7 @@ import { getAllPartners } from './partner.controller.mjs';
 const router = express.Router();
 
 // GET /api/partners
-router.post('/', getAllPartners);
+router.get('/', getAllPartners);
 
 
 export default router;
