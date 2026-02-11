@@ -185,9 +185,10 @@ export const addModel = async (req, res) => {
         error: "Name and brand are required",
       });
     }
+
     const existingModel = await Model.findOne({ name });
     if (existingModel) {
-      return res.status(400).json({ error: 'Model already exists' });
+      return res.status(400).json({ error: "Model already exists" });
     }
 
     // 1 — Find brand by name
@@ -202,47 +203,48 @@ export const addModel = async (req, res) => {
       });
     }
 
-    // 2 — Build model data directly
+    // Helper to convert incoming defect (by name) to { defect: ObjectId, price }
+    const mapDefectsByName = async (arr) => {
+      const mapped = [];
+
+      for (const d of arr) {
+        const defectName = d.defect?.trim();
+        if (!defectName) continue;
+
+        const defectDoc = await Defect.findOne({
+          name: { $regex: new RegExp("^" + defectName + "$", "i") },
+        });
+
+        if (defectDoc) {
+          mapped.push({
+            defect: defectDoc._id,
+            price: d.price ?? "",
+          });
+        } else {
+          console.warn(`Defect not found: ${defectName}`);
+        }
+      }
+
+      return mapped;
+    };
+
+    // 2 — Convert all incoming defect names to IDs
     const modelData = {
       name,
       image,
       ramStorageComb,
       brand: brandDoc._id,
-      enquiryQuestions: enquiryQuestions.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      bodyDefects: bodyDefects.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      brokenScratchDefects: brokenScratchDefects.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      screenDefects: screenDefects.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      scrachesBodyDefect: scrachesBodyDefect.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      devicePanelMissing: devicePanelMissing.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      functionalDefects: functionalDefects.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
-      availableAccessories: availableAccessories.map((d) => ({
-        defect: d.defectId,
-        price: d.price,
-      })),
+      enquiryQuestions: await mapDefectsByName(enquiryQuestions),
+      bodyDefects: await mapDefectsByName(bodyDefects),
+      brokenScratchDefects: await mapDefectsByName(brokenScratchDefects),
+      screenDefects: await mapDefectsByName(screenDefects),
+      scrachesBodyDefect: await mapDefectsByName(scrachesBodyDefect),
+      devicePanelMissing: await mapDefectsByName(devicePanelMissing),
+      functionalDefects: await mapDefectsByName(functionalDefects),
+      availableAccessories: await mapDefectsByName(availableAccessories),
     };
 
-    // 3 — Save
+    // 3 — Save model
     const newModel = new Model(modelData);
     const savedModel = await newModel.save();
 
