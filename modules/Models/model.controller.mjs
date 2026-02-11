@@ -14,7 +14,7 @@ export const getModels = async (req, res) => {
       filter.name = { $regex: name, $options: 'i' };;
     }
     if (brand_name) {
-      let brandDoc = await Brand.findOne({ name: { $regex: brand_name, $options: 'i' } });
+      let brandDoc = await Brand.findOne({ name: brand_name });
 
       if (brandDoc) {
         filter.brand = brandDoc._id;
