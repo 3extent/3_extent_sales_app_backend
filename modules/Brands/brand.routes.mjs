@@ -7,6 +7,6 @@ const router = express.Router();
 router.get('/', getBrands);
 
 // POST /api/brands/
-router.get('/', addBrands);
+router.post('/', addBrands);
 
 export default router;
