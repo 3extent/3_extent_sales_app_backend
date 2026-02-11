@@ -9,7 +9,7 @@ export const getBrands = async (req, res) => {
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
-    const brands = await Brand.find(filter);
+    const brands = await Brand.find(filter).populate("defects");
     res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
