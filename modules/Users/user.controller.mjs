@@ -18,17 +18,17 @@ export const loginUser = async (req, res) => {
     console.log('user: ', user);
 
     if (!user) {
-      return res.status(400).json({ message: 'User not found' });
+      return res.status(400).json({ error: 'User not found' });
     }
 
     // OTP mismatch
     if (otp !== user.otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
+      return res.status(400).json({ error: 'Invalid OTP' });
     }
 
     // Expiry check using moment
     if (!user.otp_expires_at || moment().valueOf() > user.otp_expires_at) {
-      return res.status(400).json({ message: 'OTP expired' });
+      return res.status(400).json({ error: 'OTP expired' });
     }
 
     // Clear OTP after successful login
@@ -68,7 +68,7 @@ export const sendOtp = async (req, res) => {
     const { contact_number } = req.body;
 
     if (!contact_number) {
-      return res.status(400).json({ message: 'Phone number is required' });
+      return res.status(400).json({ error: 'Phone number is required' });
     }
 
     // Generate OTP

@@ -182,8 +182,12 @@ export const addModel = async (req, res) => {
     if (!name || !brand) {
       return res.status(400).json({
         success: false,
-        message: "Name and brand are required",
+        error: "Name and brand are required",
       });
+    }
+    const existingModel = await Model.findOne({ name });
+    if (existingModel) {
+      return res.status(400).json({ error: 'Model already exists' });
     }
 
     // 1 — Find brand by name

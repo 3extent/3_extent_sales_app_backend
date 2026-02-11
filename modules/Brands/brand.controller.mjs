@@ -21,7 +21,7 @@ export const addBrands = async (req, res) => {
     const { name, image, possibleRamStorageComb, defects } = req.body;
     const existingBrand = await Brand.findOne({ name });
     if (existingBrand) {
-      return res.status(400).json({ message: 'Brand already exists' });
+      return res.status(400).json({ error: 'Brand already exists' });
     }
     // Find matching defect docs
     const defectDocs = await Defect.find({ name: { $in: defects } });

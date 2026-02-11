@@ -71,7 +71,7 @@ export const addActivity = async (req, res) => {
 
       let ramStorageComb = existingModel.ramStorageComb.map((singleRamStorage) => singleRamStorage.ramStorage)
       if (!ramStorageComb.includes(ramStorage)) {
-        return res.status(400).json({ message: 'RAM/Storage combination for this model does not found' });
+        return res.status(400).json({ error: 'RAM/Storage combination for this model does not found' });
       }
 
       // Suppose defects is an array of strings (names)
@@ -108,7 +108,7 @@ export const addActivity = async (req, res) => {
         });
       }
     } else {
-      return res.status(400).json({ message: 'User not found' });
+      return res.status(400).json({ error: 'User not found' });
     }
 
   } catch (err) {
