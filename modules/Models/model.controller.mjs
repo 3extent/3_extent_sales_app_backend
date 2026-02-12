@@ -1,6 +1,7 @@
 import Model from './Model.mjs';
 import Brand from '../Brands/Brand.mjs';
 import moment from 'moment';
+import Defect from '../Defects/Defect.mjs';
 
 /**
  * GET /api/models
@@ -255,7 +256,7 @@ export const addModel = async (req, res) => {
     console.error("Add Model Error:", error);
     res
       .status(500)
-      .json({ success: false, message: "Server Error" });
+      .json({ error: "Internal server error" });
   }
 };
 
