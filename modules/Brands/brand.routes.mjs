@@ -1,5 +1,6 @@
 import express from 'express';
 import { addBrands, getBrands } from './brand.controller.mjs';
+import { verifyToken } from '../../middlewares/authMiddleware.mjs';
 
 const router = express.Router();
 
