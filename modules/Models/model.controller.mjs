@@ -24,44 +24,44 @@ export const getModels = async (req, res) => {
     console.log("filter", filter)
     const models = await Model.find(filter)
       // exclude images from Model
-      .select("-image")
+      // .select("-image")
       // populate brand (if it has image, exclude them too)
       .populate({
         path: "brand",
-        select: "name",
+        // select: "name",
       })
       // populate defects and exclude image from each defect
       .populate({
         path: "enquiryQuestions.defect",
-        select: "question description",
+        // select: "question description",
       })
       .populate({
         path: "bodyDefects.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "brokenScratchDefects.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "screenDefects.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "scrachesBodyDefect.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "devicePanelMissing.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "functionalDefects.defect",
-        select: "name",
+        // select: "name",
       })
       .populate({
         path: "availableAccessories.defect",
-        select: "name",
+        // select: "name",
       });
 
     res.json(models);
