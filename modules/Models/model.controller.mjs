@@ -22,16 +22,47 @@ export const getModels = async (req, res) => {
       }
     }
     console.log("filter", filter)
-    const models = await Model.find(filter).populate('brand')
-      .populate('enquiryQuestions.defect')
-      .populate('bodyDefects.defect')
-      .populate('brokenScratchDefects.defect')
-      .populate('screenDefects.defect')
-      .populate('scrachesBodyDefect.defect')
-      .populate('devicePanelMissing.defect')
-      .populate('functionalDefects.defect')
-      .populate('availableAccessories.defect');
-    console.log("models", models)
+    const models = await Model.find(filter)
+      // exclude images from Model
+      .select("-image")
+      // populate brand (if it has image, exclude them too)
+      .populate({
+        path: "brand",
+        select: "name",
+      })
+      // populate defects and exclude image from each defect
+      .populate({
+        path: "enquiryQuestions.defect",
+        select: "question description",
+      })
+      .populate({
+        path: "bodyDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "brokenScratchDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "screenDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "scrachesBodyDefect.defect",
+        select: "name",
+      })
+      .populate({
+        path: "devicePanelMissing.defect",
+        select: "name",
+      })
+      .populate({
+        path: "functionalDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "availableAccessories.defect",
+        select: "name",
+      });
 
     res.json(models);
   } catch (err) {
