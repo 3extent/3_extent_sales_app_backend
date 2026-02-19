@@ -49,8 +49,8 @@ async function connectToDB() {
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        connectTimeoutMS: 30000,
-        serverSelectionTimeoutMS: 30000
+        connectTimeoutMS: 100000,
+        serverSelectionTimeoutMS: 100000
       }
     );
 
