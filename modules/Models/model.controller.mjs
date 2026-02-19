@@ -105,39 +105,82 @@ export const calculateDefectsPrice = async (req, res) => {
     const { defects, modelId, ramStorage } = req.body;
 
     if (!Array.isArray(defects) || !modelId) {
-      return res.status(400).json({ 
-        error: 'defects (array) and modelId are required' 
+      return res.status(400).json({
+        error: "defects (array) and modelId are required"
       });
     }
 
+    // Fetch model with all defect references populated
     const model = await Model.findById(modelId)
-      .populate('enquiryQuestions.defect')
-      .populate('bodyDefects.defect')
-      .populate('brokenScratchDefects.defect')
-      .populate('screenDefects.defect')
-      .populate('scrachesBodyDefect.defect')
-      .populate('devicePanelMissing.defect')
-      .populate('functionalDefects.defect')
-      .populate('availableAccessories.defect');
+      .populate("enquiryQuestions.defect")
+      .populate("bodyDefects.defect")
+      .populate("brokenScratchDefects.defect")
+      .populate("screenDefects.defect")
+      .populate("scrachesBodyDefect.defect")
+      .populate("devicePanelMissing.defect")
+      .populate("functionalDefects.defect")
+      .populate("availableAccessories.defect");
 
     if (!model) {
-      return res.status(404).json({ error: 'Model not found' });
+      return res.status(404).json({ error: "Model not found" });
     }
 
+    // Combine all defect arrays
     const defectArrays = [
-      model.enquiryQuestions,
-      model.bodyDefects,
-      model.brokenScratchDefects,
-      model.screenDefects,
-      model.scrachesBodyDefect,
-      model.devicePanelMissing,
-      model.functionalDefects,
-      model.availableAccessories
+      model.enquiryQuestions || [],
+      model.bodyDefects || [],
+      model.brokenScratchDefects || [],
+      model.screenDefects || [],
+      model.scrachesBodyDefect || [],
+      model.devicePanelMissing || [],
+      model.functionalDefects || [],
+      model.availableAccessories || []
     ];
 
+    let ramStoragePrice = 0;
+    
+    if (ramStorage && Array.isArray(model.ramStorageComb)) {
+      const ramStorageEntry = model.ramStorageComb.find(
+        comb => comb.ramStorage === ramStorage
+      );
+      
+      if (ramStorageEntry?.price) {
+        ramStoragePrice = parseFloat(ramStorageEntry.price) || 0;
+      }
+    }
+
+    // 🔥 STEP 1: If deadMobile exists → override everything
+    if (defects.includes("deadMobile")) {
+
+      for (const arr of defectArrays) {
+        const match = arr.find(
+          entry => entry.defect && entry.defect.name === "deadMobile"
+        );
+
+        if (match) {
+          const deadPrice = parseFloat(match.price) || 0;
+
+          return res.json({
+            totalPrice: deadPrice,
+            totalDefectPrice: deadPrice,
+            ramStoragePrice,
+            defects: [{
+              defectName: "deadMobile",
+              price: deadPrice
+            }],
+            deadMobileApplied: true
+          });
+        }
+      }
+
+      return res.status(400).json({
+        error: "deadMobile defect not configured for this model"
+      });
+    }
+
+    // 🔥 STEP 2: Normal defect calculation
     let totalDefectPrice = 0;
     let matchedDefects = [];
-    let deadMobilePrice = null;
 
     for (const defectName of defects) {
       let found = false;
@@ -156,13 +199,7 @@ export const calculateDefectsPrice = async (req, res) => {
           });
 
           if (!isNaN(priceValue)) {
-
-            // 🔥 Special case: deadMobile
-            if (defectName === "deadMobile") {
-              deadMobilePrice = priceValue;
-            } else {
-              totalDefectPrice += priceValue;
-            }
+            totalDefectPrice += priceValue;
           }
 
           found = true;
@@ -174,47 +211,27 @@ export const calculateDefectsPrice = async (req, res) => {
         matchedDefects.push({
           defectName,
           price: null,
-          error: 'Defect not found on this model'
+          error: "Defect not found on this model"
         });
       }
     }
 
-    // Get RAM/Storage price
-    let ramStoragePrice = 0;
-    if (ramStorage && Array.isArray(model.ramStorageComb)) {
-      const ramStorageEntry = model.ramStorageComb.find(
-        comb => comb.ramStorage === ramStorage
-      );
+    // 🔥 STEP 4: Final price calculation
+    const calculatedTotalPrice = ramStoragePrice - totalDefectPrice;
 
-      if (ramStorageEntry?.price) {
-        const ramStorageVal = parseFloat(ramStorageEntry.price);
-        if (!isNaN(ramStorageVal)) {
-          ramStoragePrice = ramStorageVal;
-        }
-      }
-    }
-
-    let calculatedTotalPrice;
-
-    // 🔥 If deadMobile exists → override total price
-    if (deadMobilePrice !== null) {
-      calculatedTotalPrice = deadMobilePrice;
-    } else {
-      calculatedTotalPrice = ramStoragePrice - totalDefectPrice;
-    }
-
-    res.json({
+    return res.json({
       totalPrice: calculatedTotalPrice,
-      defects: matchedDefects,
-      ramStoragePrice,
       totalDefectPrice,
-      deadMobileApplied: deadMobilePrice !== null
+      ramStoragePrice,
+      defects: matchedDefects,
+      deadMobileApplied: false
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
+
 
 //POST api/models
 
