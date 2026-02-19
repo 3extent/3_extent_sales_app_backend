@@ -103,8 +103,11 @@ export const getModelById = async (req, res) => {
 export const calculateDefectsPrice = async (req, res) => {
   try {
     const { defects, modelId, ramStorage } = req.body;
+
     if (!Array.isArray(defects) || !modelId) {
-      return res.status(400).json({ error: 'defects (array) and modelId are required' });
+      return res.status(400).json({ 
+        error: 'defects (array) and modelId are required' 
+      });
     }
 
     const model = await Model.findById(modelId)
@@ -134,35 +137,32 @@ export const calculateDefectsPrice = async (req, res) => {
 
     let totalDefectPrice = 0;
     let matchedDefects = [];
+    let deadMobilePrice = null;
 
     for (const defectName of defects) {
-
       let found = false;
 
       for (const arr of defectArrays) {
-        const match = arr.find(entry => entry.defect && entry.defect.name === defectName);
+        const match = arr.find(
+          entry => entry.defect && entry.defect.name === defectName
+        );
+
         if (match) {
           const priceValue = parseFloat(match.price);
 
-          // Special case: deadMobile
-          if (defectName === "deadMobile" && !isNaN(priceValue)) {
-            totalDefectPrice = priceValue;   // override price
-            matchedDefects.push({
-              defectName,
-              price: priceValue
-            });
-            found = true;
-            break;
-          }
-
-          // Normal defect price accumulation
           matchedDefects.push({
             defectName,
-            price: priceValue
+            price: match.price
           });
 
           if (!isNaN(priceValue)) {
-            totalDefectPrice += priceValue;
+
+            // 🔥 Special case: deadMobile
+            if (defectName === "deadMobile") {
+              deadMobilePrice = priceValue;
+            } else {
+              totalDefectPrice += priceValue;
+            }
           }
 
           found = true;
@@ -177,15 +177,16 @@ export const calculateDefectsPrice = async (req, res) => {
           error: 'Defect not found on this model'
         });
       }
-
-      // if deadMobile found, stop further loops
-      if (defectName === "deadMobile") break;
     }
 
+    // Get RAM/Storage price
     let ramStoragePrice = 0;
     if (ramStorage && Array.isArray(model.ramStorageComb)) {
-      const ramStorageEntry = model.ramStorageComb.find(comb => comb.ramStorage === ramStorage);
-      if (ramStorageEntry && ramStorageEntry.price) {
+      const ramStorageEntry = model.ramStorageComb.find(
+        comb => comb.ramStorage === ramStorage
+      );
+
+      if (ramStorageEntry?.price) {
         const ramStorageVal = parseFloat(ramStorageEntry.price);
         if (!isNaN(ramStorageVal)) {
           ramStoragePrice = ramStorageVal;
@@ -193,20 +194,27 @@ export const calculateDefectsPrice = async (req, res) => {
       }
     }
 
-    const calculatedTotalPrice = ramStoragePrice - totalDefectPrice;
+    let calculatedTotalPrice;
+
+    // 🔥 If deadMobile exists → override total price
+    if (deadMobilePrice !== null) {
+      calculatedTotalPrice = deadMobilePrice;
+    } else {
+      calculatedTotalPrice = ramStoragePrice - totalDefectPrice;
+    }
 
     res.json({
       totalPrice: calculatedTotalPrice,
       defects: matchedDefects,
       ramStoragePrice,
-      totalDefectPrice
+      totalDefectPrice,
+      deadMobileApplied: deadMobilePrice !== null
     });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 //POST api/models
 
