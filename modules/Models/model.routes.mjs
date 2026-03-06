@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getModels,
+  getModelsList,
   getModelById,
   addModel,
   calculateDefectsPrice,
@@ -11,6 +12,9 @@ import { verifyToken } from '../../middlewares/authMiddleware.mjs';
 const router = express.Router();
 
 router.get('/', getModels);
+
+router.get('/list', getModelsList);
+
 router.get('/:id', getModelById);
 router.post('/', verifyToken, addModel);
 router.post('/calculate-defects-price', verifyToken, calculateDefectsPrice);

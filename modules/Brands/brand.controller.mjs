@@ -16,6 +16,21 @@ export const getBrands = async (req, res) => {
   }
 };
 
+export const getBrandsNames = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    let filter = {};
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
+    }
+    const brands = await Brand.find(filter).select('name');
+    res.json(brands);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const addBrands = async (req, res) => {
   try {
     const { name, image, possibleRamStorageComb, defects } = req.body;

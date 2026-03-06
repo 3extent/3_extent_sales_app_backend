@@ -70,6 +70,71 @@ export const getModels = async (req, res) => {
   }
 };
 
+export const getModelsList = async (req, res) => {
+  try {
+    const { brand_name, name } = req.query;
+
+    let filter = {};
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };;
+    }
+    if (brand_name) {
+      let brandDoc = await Brand.findOne({ name: brand_name });
+
+      if (brandDoc) {
+        filter.brand = brandDoc._id;
+      }
+    }
+    console.log("filter", filter)
+    const models = await Model.find(filter)
+      // exclude images from Model
+      .select("-image")
+      // populate brand (if it has image, exclude them too)
+      .populate({
+        path: "brand",
+        select: "name",
+      })
+      // populate defects and exclude image from each defect
+      .populate({
+        path: "enquiryQuestions.defect",
+        select: "-image"
+        // select: "question description",
+      })
+      .populate({
+        path: "bodyDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "brokenScratchDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "screenDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "scrachesBodyDefect.defect",
+        select: "name",
+      })
+      .populate({
+        path: "devicePanelMissing.defect",
+        select: "name",
+      })
+      .populate({
+        path: "functionalDefects.defect",
+        select: "name",
+      })
+      .populate({
+        path: "availableAccessories.defect",
+        select: "name",
+      });
+
+    res.json(models);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 /**
  * GET /api/models/:id
  */
@@ -138,12 +203,12 @@ export const calculateDefectsPrice = async (req, res) => {
     ];
 
     let ramStoragePrice = 0;
-    
+
     if (ramStorage && Array.isArray(model.ramStorageComb)) {
       const ramStorageEntry = model.ramStorageComb.find(
         comb => comb.ramStorage === ramStorage
       );
-      
+
       if (ramStorageEntry?.price) {
         ramStoragePrice = parseFloat(ramStorageEntry.price) || 0;
       }
