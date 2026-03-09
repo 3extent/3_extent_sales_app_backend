@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import twilio from 'twilio';
 import otpGenerator from 'otp-generator';
 import dotenv from 'dotenv';
+import UserRole from '../UserRoles/UserRole.mjs';
 
 dotenv.config();
 
@@ -98,6 +99,8 @@ export const sendOtp = async (req, res) => {
       // ♻️ Existing user → update OTP
       user.otp = otp;
       user.otp_expires_at = otpExpiry;
+      const userRole = await UserRole.findOne({ name: "USER" })
+      user.role = userRole._id;
       await user.save();
     }
 
