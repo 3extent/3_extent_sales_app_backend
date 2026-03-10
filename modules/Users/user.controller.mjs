@@ -89,18 +89,19 @@ export const sendOtp = async (req, res) => {
 
     if (!user) {
       // 🆕 Create new user
+      const userRole = await UserRole.findOne({ name: "USER" })
       user = await User.create({
         contact_number,
         otp,
-        otp_expires_at: otpExpiry
+        otp_expires_at: otpExpiry,
+        role: userRole._id
       });
+
       is_new = true;
     } else {
       // ♻️ Existing user → update OTP
       user.otp = otp;
       user.otp_expires_at = otpExpiry;
-      const userRole = await UserRole.findOne({ name: "USER" })
-      user.role = userRole._id;
       await user.save();
     }
 
