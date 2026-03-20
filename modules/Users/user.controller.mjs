@@ -124,3 +124,58 @@ export const sendOtp = async (req, res) => {
     res.status(500).json({ message: 'Failed to send OTP' });
   }
 };
+
+
+
+export const updateUserAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      pincode,
+      office_address,
+      area,
+      land_mark,
+      alternate_number,
+      addressType
+    } = req.body;
+
+    let user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found"
+      });
+    }
+
+    if (user.address && !Array.isArray(user.address)) {
+      user.address = [];
+      await user.save();
+    }
+
+    const newAddress = {
+      pincode,
+      office_address,
+      area,
+      land_mark,
+      alternate_number,
+      addressType
+    };
+
+    user.address.push(newAddress);
+
+    user.updated_at = moment.utc().valueOf();
+
+    await user.save();
+
+    res.json({
+      message: "Address added successfully",
+      user
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
