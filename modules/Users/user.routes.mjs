@@ -12,7 +12,7 @@ router.post('/send', sendOtp);
 // PUT /api/users/:id
 router.put("/:id", updateUserAddress);
 
-//GET /api/user
+//GET /api/user/id
 router.get('/:id', getuserById);
 
 

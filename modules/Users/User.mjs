@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
   otp: String,
   otp_expires_at: Number,
 
-  // address: String,
   
   address: [{
     pincode: Number,
