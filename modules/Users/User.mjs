@@ -10,15 +10,16 @@ const userSchema = new mongoose.Schema({
   otp: String,
   otp_expires_at: Number,
 
-  
-  address: [{
-    pincode: Number,
-    office_address: String,
-    area: String,
-    land_mark: String,
-    alternate_number: Number,
-    addressType: String
-  }],
+  address: [
+    {
+      pincode: Number,
+      flat_no: String,
+      area: String,
+      land_mark: String,
+      alternate_number: Number,
+      type: String
+    }
+  ],
 
   role: { type: mongoose.Schema.Types.ObjectId, ref: 'UserRole' },
   partner: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' },

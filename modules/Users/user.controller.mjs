@@ -132,15 +132,17 @@ export const updateUserAddress = async (req, res) => {
     const { id } = req.params;
 
     const {
+      name,
       pincode,
-      office_address,
+      flat_no,
       area,
       land_mark,
       alternate_number,
-      addressType
+      type
     } = req.body;
 
     let user = await User.findById(id);
+    console.log('user: ', user);
 
     if (!user) {
       return res.status(404).json({
@@ -148,20 +150,31 @@ export const updateUserAddress = async (req, res) => {
       });
     }
 
-    if (user.address && !Array.isArray(user.address)) {
+    // update name
+    if (name) {
+      user.name = name;
+    }
+
+    // ✅ FIX HERE
+    if (!user.address) {
       user.address = [];
-      await user.save();
     }
 
     const newAddress = {
       pincode,
-      office_address,
+      flat_no,
       area,
       land_mark,
       alternate_number,
-      addressType
+      type
     };
 
+
+
+    console.log('user: ', user);
+    console.log(User.schema.obj.address);
+
+    console.log('newAddress: ', typeof newAddress);
     user.address.push(newAddress);
 
     user.updated_at = moment.utc().valueOf();
@@ -169,7 +182,7 @@ export const updateUserAddress = async (req, res) => {
     await user.save();
 
     res.json({
-      message: "Address added successfully",
+      message: "Name updated & Address added",
       user
     });
 
@@ -197,6 +210,25 @@ export const getuserById = async (req, res) => {
 
     res.json({
       user
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+
+    const users = await User.find()
+      .populate("role")
+      .populate("partner");
+
+    res.json({
+      message: "All users fetched",
+      users
     });
 
   } catch (err) {

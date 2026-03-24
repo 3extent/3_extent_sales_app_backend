@@ -1,5 +1,5 @@
 import express from 'express';
-import { getuserById, loginUser, sendOtp, updateUserAddress } from './user.controller.mjs';
+import { getAllUsers, getuserById, loginUser, sendOtp, updateUserAddress } from './user.controller.mjs';
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.put("/:id", updateUserAddress);
 
 //GET /api/user/id
 router.get('/:id', getuserById);
+
+//GET  /api/users/
+router.get('/', getAllUsers);
 
 
 export default router;
