@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
       area: String,
       land_mark: String,
       alternate_number: Number,
-      type: String
+      type: { type: String }
     }
   ],
 
