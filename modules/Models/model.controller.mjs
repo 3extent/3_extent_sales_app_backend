@@ -429,3 +429,44 @@ export const updateModel = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+ export const getModelNameAndId = async (req, res) => {
+  try {
+    const { brand_name, name } = req.query;
+
+    let filter = {};
+
+    if (name) {
+      filter.name = { $regex: name, $options: "i" };
+    }
+
+    if (brand_name) {
+      const brandDoc = await Brand.findOne({
+        name: { $regex: new RegExp("^" + brand_name + "$", "i") }
+      });
+
+      if (brandDoc) {
+        filter.brand = brandDoc._id;
+      } else {
+        return res.json([]);
+       
+      }
+    }
+
+    const models = await Model.find(filter)
+      .select("_id name")   
+      .sort({ name: 1 });
+
+    
+    res.json(models);
+    console.log('models: ', models);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+ 
+
+
+
