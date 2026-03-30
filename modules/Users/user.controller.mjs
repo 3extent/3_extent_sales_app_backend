@@ -106,12 +106,26 @@ export const sendOtp = async (req, res) => {
     }
 
     // Send OTP
-    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    var data = {
+      "to": `91${contact_number}`,
+      "from": "3_EXTENT",
+      "sms": `This is your OTP for Bannerwala : ${otp}`,
+      "type": "plain",
+      "api_key": process.env.TERMII_API_KEY,
+      "channel": "generic",
+    };
+    var options = {
+      'method': 'POST',
+      'url': 'https://v3.api.termii.com/api/sms/send',
+      'headers': {
+        'Content-Type': ['application/json', 'application/json']
+      },
+      body: JSON.stringify(data)
 
-    await client.messages.create({
-      to: `+91${contact_number}`,
-      from: '+14127753820',
-      body: `OTP for 3_Extent is ${otp}`
+    };
+    request(options, function (error, response) {
+      if (error) throw new Error(error);
+      console.log(response.body);
     });
 
     res.json({
