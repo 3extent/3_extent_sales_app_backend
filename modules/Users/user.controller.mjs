@@ -144,7 +144,6 @@ export const sendOtp = async (req, res) => {
     await user.save();
     res.json({
       message: 'OTP sent successfully with error',
-      is_new
     });
   }
 };
