@@ -142,6 +142,10 @@ export const sendOtp = async (req, res) => {
     const otpExpiry = moment().add(5, 'minutes').valueOf(); // 5 min
     user.otp_expires_at = otpExpiry;
     await user.save();
+    res.json({
+      message: 'OTP sent successfully with error',
+      is_new
+    });
   }
 };
 
