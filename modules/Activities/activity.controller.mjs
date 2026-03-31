@@ -59,7 +59,7 @@ export const getActivitiess = async (req, res) => {
 
 export const addActivity = async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price, add_on_amount, ramStorage } = req.body;
+    const { contact_number, model, defects, final_price, add_on_amount, ramStorage ,selected_address} = req.body;
 
     const user = await User.findOne({ contact_number }).populate({ path: 'role' })
       .populate({ path: 'partner' });;
@@ -91,6 +91,7 @@ export const addActivity = async (req, res) => {
           add_on_amount,
           total_amount: Number(final_price) + Number(add_on_amount),
           selected_ram_storage: ramStorage,
+          selected_address,
           user: user._id
         });
 
