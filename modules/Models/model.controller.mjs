@@ -144,6 +144,7 @@ export const getModelById = async (req, res) => {
     const model = await Model.findById(id)
       .populate('brand')
       .populate('enquiryQuestions.defect')
+      .populate('warrenty.defect')
       .populate('bodyDefects.defect')
       .populate('brokenScratchDefects.defect')
       .populate('screenDefects.defect')
@@ -308,6 +309,7 @@ export const addModel = async (req, res) => {
       ramStorageComb,
       brand,
       enquiryQuestions = [],
+      warrenty = [],
       bodyDefects = [],
       brokenScratchDefects = [],
       screenDefects = [],
@@ -373,6 +375,7 @@ export const addModel = async (req, res) => {
       ramStorageComb,
       brand: brandDoc._id,
       enquiryQuestions: await mapDefectsByName(enquiryQuestions),
+      warrenty: await mapDefectsByName(warrenty),
       bodyDefects: await mapDefectsByName(bodyDefects),
       brokenScratchDefects: await mapDefectsByName(brokenScratchDefects),
       screenDefects: await mapDefectsByName(screenDefects),
@@ -431,7 +434,7 @@ export const updateModel = async (req, res) => {
 };
 
 
- export const getModelNameAndId = async (req, res) => {
+export const getModelNameAndId = async (req, res) => {
   try {
     const { brand_name, name } = req.query;
 
@@ -450,15 +453,15 @@ export const updateModel = async (req, res) => {
         filter.brand = brandDoc._id;
       } else {
         return res.json([]);
-       
+
       }
     }
 
     const models = await Model.find(filter)
-      .select("_id name")   
+      .select("_id name")
       .sort({ name: 1 });
 
-    
+
     res.json(models);
     console.log('models: ', models);
 
@@ -466,7 +469,7 @@ export const updateModel = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
- 
+
 
 
 

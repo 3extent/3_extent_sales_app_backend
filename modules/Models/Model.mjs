@@ -7,6 +7,7 @@ const modelSchema = new mongoose.Schema({
   ramStorageComb: [{ ramStorage: String, price: String }],
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
   enquiryQuestions: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
+  warrenty: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   bodyDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   brokenScratchDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   screenDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
