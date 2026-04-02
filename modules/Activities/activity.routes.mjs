@@ -1,5 +1,5 @@
 import express from 'express';
-import { getActivitiess, addActivity, assignActivity } from './activity.controller.mjs';
+import { getActivitiess, addActivity, updateActivityStatus } from './activity.controller.mjs';
 import { verifyToken } from '../../middlewares/authMiddleware.mjs';
 
 const router = express.Router();
@@ -11,6 +11,6 @@ router.get('/', verifyToken, getActivitiess);
 router.post('/', verifyToken, addActivity);
 
 // PATCH /api/activity/:activityId/assign
-router.post('/:activityId/assign', verifyToken, assignActivity);
+router.post('/:activityId/assign', verifyToken, updateActivityStatus);
 
 export default router;

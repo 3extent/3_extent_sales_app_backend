@@ -129,20 +129,19 @@ export const addActivity = async (req, res) => {
 }
 
 /**
- * PATCH /api/activities/:activityId/assign
+ * PATCH /api/activity/:activityId/status
  */
-export const assignActivity = async (req, res) => {
+export const updateActivityStatus = async (req, res) => {
   try {
     const { activityId } = req.params;
-    const { assigned_to } = req.body;
+    const { status, assigned_to } = req.body;
 
-    if (!assigned_to) {
+    if (!status) {
       return res.status(400).json({
-        error: "assigned_to is required"
+        error: "status is required"
       });
     }
 
-    // Check activity
     const activity = await Activity.findById(activityId);
 
     if (!activity) {
@@ -151,26 +150,28 @@ export const assignActivity = async (req, res) => {
       });
     }
 
-    // Check assigned user exists
-    const assignedUser = await User.findById(assigned_to);
+    // Optional assigned_to validation
+    if (assigned_to) {
+      const assignedUser = await User.findById(assigned_to);
 
-    if (!assignedUser) {
-      return res.status(404).json({
-        error: "Assigned user not found"
-      });
+      if (!assignedUser) {
+        return res.status(404).json({
+          error: "Assigned user not found"
+        });
+      }
+
+      activity.assigned_to = assigned_to;
     }
 
-    // Update activity
-    activity.status = "ASSIGNED";
-    activity.assigned_to = assigned_to;
+    activity.status = status;
 
     await activity.save();
 
     return res.json({
-      message: "Activity assigned successfully",
+      message: "Activity status updated successfully",
       activityId: activity._id,
       status: activity.status,
-      assigned_to: activity.assigned_to
+      assigned_to: activity.assigned_to || null
     });
 
   } catch (err) {
