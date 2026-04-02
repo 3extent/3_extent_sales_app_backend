@@ -6,11 +6,14 @@ import Partner from "../Partners/Partner.mjs";
 
 export const getActivitiess = async (req, res) => {
   try {
-    const { contact_number, model_name, selected_ram_storage, partner_name } = req.query;
+    const { contact_number, model_name, selected_ram_storage, partner_name, assigned_to, status } = req.query;
     let filter = {};
 
     if (selected_ram_storage) {
       filter.selected_ram_storage = selected_ram_storage;
+    }
+    if (status) {
+      filter.status = status;
     }
 
     if (model_name) {
@@ -24,6 +27,13 @@ export const getActivitiess = async (req, res) => {
         .populate({ path: 'partner' });;
       if (userDoc) {
         filter.user = userDoc._id;
+      }
+    }
+    if (assigned_to) {
+      let userDoc = await User.findOne({ name: { $regex: assigned_to, $options: 'i' } }).populate({ path: 'role' })
+        .populate({ path: 'partner' });;
+      if (userDoc) {
+        filter.assigned_to = userDoc._id;
       }
     }
     if (partner_name) {
@@ -59,7 +69,7 @@ export const getActivitiess = async (req, res) => {
 
 export const addActivity = async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price, add_on_amount, ramStorage ,selected_address} = req.body;
+    const { contact_number, model, defects, final_price, add_on_amount, ramStorage, selected_address } = req.body;
 
     const user = await User.findOne({ contact_number }).populate({ path: 'role' })
       .populate({ path: 'partner' });;
@@ -92,7 +102,8 @@ export const addActivity = async (req, res) => {
           total_amount: Number(final_price) + Number(add_on_amount),
           selected_ram_storage: ramStorage,
           selected_address,
-          user: user._id
+          user: user._id,
+          status: "PENDING"
         });
 
         await activity.save();
@@ -116,3 +127,55 @@ export const addActivity = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 }
+
+/**
+ * PATCH /api/activities/:activityId/assign
+ */
+export const assignActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const { assigned_to } = req.body;
+
+    if (!assigned_to) {
+      return res.status(400).json({
+        error: "assigned_to is required"
+      });
+    }
+
+    // Check activity
+    const activity = await Activity.findById(activityId);
+
+    if (!activity) {
+      return res.status(404).json({
+        error: "Activity not found"
+      });
+    }
+
+    // Check assigned user exists
+    const assignedUser = await User.findById(assigned_to);
+
+    if (!assignedUser) {
+      return res.status(404).json({
+        error: "Assigned user not found"
+      });
+    }
+
+    // Update activity
+    activity.status = "ASSIGNED";
+    activity.assigned_to = assigned_to;
+
+    await activity.save();
+
+    return res.json({
+      message: "Activity assigned successfully",
+      activityId: activity._id,
+      status: activity.status,
+      assigned_to: activity.assigned_to
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+};
