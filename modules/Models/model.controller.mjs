@@ -144,7 +144,7 @@ export const getModelById = async (req, res) => {
     const model = await Model.findById(id)
       .populate('brand')
       .populate('enquiryQuestions.defect')
-      .populate('warrenty.defect')
+      .populate('warranty.defect')
       .populate('bodyDefects.defect')
       .populate('brokenScratchDefects.defect')
       .populate('screenDefects.defect')
@@ -309,7 +309,7 @@ export const addModel = async (req, res) => {
       ramStorageComb,
       brand,
       enquiryQuestions = [],
-      warrenty = [],
+      warranty = [],
       bodyDefects = [],
       brokenScratchDefects = [],
       screenDefects = [],
@@ -375,7 +375,7 @@ export const addModel = async (req, res) => {
       ramStorageComb,
       brand: brandDoc._id,
       enquiryQuestions: await mapDefectsByName(enquiryQuestions),
-      warrenty: await mapDefectsByName(warrenty),
+      warranty: await mapDefectsByName(warranty),
       bodyDefects: await mapDefectsByName(bodyDefects),
       brokenScratchDefects: await mapDefectsByName(brokenScratchDefects),
       screenDefects: await mapDefectsByName(screenDefects),
