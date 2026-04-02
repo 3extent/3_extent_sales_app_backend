@@ -245,7 +245,18 @@ export const getuserById = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
 
-    const users = await User.find()
+    const { role } = req.query;
+
+    let filter = {};
+    if (role) {
+      const existingRole = await UserRole.findOne({ name: role });
+      if (!existingRole) {
+        return res.status(400).json({ message: 'User role not found' });
+      }
+      filter.role = existingRole._id;
+    }
+
+    const users = await User.find(filter)
       .populate("role")
       .populate("partner");
 
