@@ -137,7 +137,7 @@ export const sendOtp = async (req, res) => {
     // ♻️ Existing user → update OTP
     let user = await User.findOne({ contact_number: req.body.contact_number }).populate({ path: 'role' })
       .populate({ path: 'partner' });
-    user.otp = "1234";
+    user.otp = "123456";
     const otpExpiry = moment().add(5, 'minutes').valueOf(); // 5 min
     user.otp_expires_at = otpExpiry;
     await user.save();
