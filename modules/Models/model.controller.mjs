@@ -98,7 +98,9 @@ export const getModelsList = async (req, res) => {
       .populate({
         path: "enquiryQuestions.defect",
         select: "-image"
-        // select: "question description",
+      })
+      .populate({
+        path: "warranty.defect",
       })
       .populate({
         path: "bodyDefects.defect",
