@@ -160,7 +160,7 @@ export const updateActivityStatus = async (req, res) => {
         });
       }
 
-      activity.assigned_to = assignedUser._id;
+      activity.assigned_to = assigned_to;
     }
 
     activity.status = status;
