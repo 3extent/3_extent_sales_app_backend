@@ -36,6 +36,9 @@ export const getModels = async (req, res) => {
         // select: "question description",
       })
       .populate({
+        path: "warranty.defect",
+      })
+      .populate({
         path: "bodyDefects.defect",
         // select: "name",
       })
