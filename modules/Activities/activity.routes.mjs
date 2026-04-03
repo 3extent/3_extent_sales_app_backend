@@ -4,13 +4,14 @@ import { verifyToken } from '../../middlewares/authMiddleware.mjs';
 
 const router = express.Router();
 
+// PATCH /api/activity/:activityId/assign
+router.patch('/:activityId/assign', verifyToken, updateActivityStatus);
+
 // GET /api/activity/
 router.get('/', verifyToken, getActivitiess);
 
 // POST /api/activity/
 router.post('/', verifyToken, addActivity);
 
-// PATCH /api/activity/:activityId/assign
-router.post('/:activityId/assign', verifyToken, updateActivityStatus);
 
 export default router;
