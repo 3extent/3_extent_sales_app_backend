@@ -11,7 +11,8 @@ const WARRANTY = {
   "Below 3 months": 0,
   "3 months - 6 months": 10,
   "6 months - 11 months": 15,
-  "Above 11 months": 20
+  "Above 11 months": 20,
+  "None": 20
 }
 
 export const getModels = async (req, res) => {
@@ -259,6 +260,7 @@ export const calculateDefectsPrice = async (req, res) => {
 
     // 🔥 STEP 2: Process defects
     let warrantyPercent = 0;
+    let warrantyFound = false;
 
     for (const defectName of defects) {
 
@@ -268,6 +270,7 @@ export const calculateDefectsPrice = async (req, res) => {
 
         // take max warranty benefit
         warrantyPercent = Math.max(warrantyPercent, percent);
+        warrantyFound = true;
 
         matchedDefects.push({
           defectName,
@@ -310,8 +313,14 @@ export const calculateDefectsPrice = async (req, res) => {
     }
 
     // 🔥 STEP 3: Apply warranty ONCE
-    const warrantyPrice =
-      ramStoragePrice * (1 - warrantyPercent / 100);
+
+    if (!warrantyFound) {
+      warrantyPercent = Number(WARRANTY["Above 11 months"]); // 20%
+    }
+    
+    const warrantyPrice = Math.round(
+      ramStoragePrice * (1 - warrantyPercent / 100)
+    );
 
     // 🔥 STEP 4: Final price
     const totalPrice = warrantyPrice - totalDefectPrice;
