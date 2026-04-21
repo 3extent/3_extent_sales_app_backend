@@ -6,6 +6,14 @@ import Defect from '../Defects/Defect.mjs';
 /**
  * GET /api/models
  */
+
+const WARRANTY = {
+  "Below 3 months": 0,
+  "3 months - 6 months": 10,
+  "6 months - 11 months": 15,
+  "Above 11 months": 20
+}
+
 export const getModels = async (req, res) => {
   try {
     const { brand_name, name } = req.query;
@@ -173,7 +181,7 @@ export const getModelById = async (req, res) => {
  */
 export const calculateDefectsPrice = async (req, res) => {
   try {
-    const { defects, modelId } = req.body;
+    const { defects, modelId, ramStorage } = req.body;
 
     if (!Array.isArray(defects) || !modelId) {
       return res.status(400).json({
@@ -181,7 +189,6 @@ export const calculateDefectsPrice = async (req, res) => {
       });
     }
 
-    // Fetch model with all defect references populated
     const model = await Model.findById(modelId)
       .populate("enquiryQuestions.defect")
       .populate("warranty.defect")
@@ -197,7 +204,6 @@ export const calculateDefectsPrice = async (req, res) => {
       return res.status(404).json({ error: "Model not found" });
     }
 
-    // Combine all defect arrays
     const defectArrays = [
       model.enquiryQuestions || [],
       model.warranty || [],
@@ -210,20 +216,29 @@ export const calculateDefectsPrice = async (req, res) => {
       model.availableAccessories || []
     ];
 
-    let warrantyPrice = 0;
     let totalDefectPrice = 0;
     let matchedDefects = [];
+    let ramStoragePrice = 0;
 
-    // 🔥 STEP 1: If deadMobile exists → override everything
+    // ✅ Get base price from RAM/Storage
+    if (ramStorage && Array.isArray(model.ramStorageComb)) {
+      const entry = model.ramStorageComb.find(
+        comb => comb.ramStorage === ramStorage
+      );
+      if (entry?.price) {
+        ramStoragePrice = Number(entry.price) || 0;
+      }
+    }
+
+    // 🔥 STEP 1: deadMobile override
     if (defects.includes("deadMobile")) {
-
       for (const arr of defectArrays) {
         const match = arr.find(
-          entry => entry.defect && entry.defect.name === "deadMobile"
+          entry => entry.defect?.name === "deadMobile"
         );
 
         if (match) {
-          const deadPrice = parseFloat(match.price) || 0;
+          const deadPrice = Number(match.price) || 0;
 
           return res.json({
             totalPrice: deadPrice,
@@ -243,44 +258,43 @@ export const calculateDefectsPrice = async (req, res) => {
     }
 
     // 🔥 STEP 2: Process defects
+    let warrantyPercent = 0;
+
     for (const defectName of defects) {
 
-      // Check if this defect is a warranty
-      const warrantyMatch = model.warranty?.find(
-        w => w.defect && w.defect.name === defectName
-      );
+      // ✅ Warranty handling
+      if (WARRANTY.hasOwnProperty(defectName)) {
+        const percent = Number(WARRANTY[defectName]) || 0;
 
-      if (warrantyMatch) {
-        warrantyPrice = parseFloat(warrantyMatch.price) || 0;
+        // take max warranty benefit
+        warrantyPercent = Math.max(warrantyPercent, percent);
 
         matchedDefects.push({
           defectName,
-          price: warrantyMatch.price,
+          percent,
           type: "warranty"
         });
 
         continue;
       }
 
+      // ✅ Normal defects
       let found = false;
 
       for (const arr of defectArrays) {
         const match = arr.find(
-          entry => entry.defect && entry.defect.name === defectName
+          entry => entry.defect?.name === defectName
         );
 
         if (match) {
-          const priceValue = parseFloat(match.price);
+          const priceValue = Number(match.price) || 0;
 
           matchedDefects.push({
             defectName,
-            price: match.price
+            price: priceValue
           });
 
-          if (!isNaN(priceValue)) {
-            totalDefectPrice += priceValue;
-          }
-
+          totalDefectPrice += priceValue;
           found = true;
           break;
         }
@@ -295,13 +309,21 @@ export const calculateDefectsPrice = async (req, res) => {
       }
     }
 
-    // 🔥 STEP 3: Final price calculation
+    // 🔥 STEP 3: Apply warranty ONCE
+    const warrantyPrice =
+      ramStoragePrice * (1 - warrantyPercent / 100);
 
-    const calculatedTotalPrice = warrantyPrice - totalDefectPrice;
+    // 🔥 STEP 4: Final price
+    const totalPrice = warrantyPrice - totalDefectPrice;
 
     return res.json({
-      totalPrice: calculatedTotalPrice,
+      basePrice: ramStoragePrice,
+      warranty: {
+        percent: warrantyPercent,
+        priceAfterWarranty: warrantyPrice
+      },
       totalDefectPrice,
+      totalPrice,
       defects: matchedDefects,
       deadMobileApplied: false
     });
