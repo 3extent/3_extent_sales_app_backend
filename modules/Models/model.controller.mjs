@@ -33,7 +33,7 @@ export const getModels = async (req, res) => {
     console.log("filter", filter)
     const models = await Model.find(filter)
       // exclude images from Model
-      // .select("-image")
+      .select("-image")
       // populate brand (if it has image, exclude them too)
       .populate({
         path: "brand",

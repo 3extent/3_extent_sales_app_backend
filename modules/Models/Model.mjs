@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const modelSchema = new mongoose.Schema({
   name: String,
   image: String,
+  thumbnailBase64:String,
   ramStorageComb: [{ ramStorage: String, price: String }],
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
   enquiryQuestions: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
