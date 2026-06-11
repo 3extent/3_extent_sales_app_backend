@@ -37,42 +37,51 @@ export const getModels = async (req, res) => {
       // populate brand (if it has image, exclude them too)
       .populate({
         path: "brand",
-        // select: "name",
+        select: "-image",
       })
       // populate defects and exclude image from each defect
       .populate({
         path: "enquiryQuestions.defect",
+        select: "-image",
         // select: "question description",
       })
       .populate({
         path: "warranty.defect",
+        select: "-image",
       })
       .populate({
         path: "bodyDefects.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "brokenScratchDefects.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "screenDefects.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "scrachesBodyDefect.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "devicePanelMissing.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "functionalDefects.defect",
+        select: "-image",
         // select: "name",
       })
       .populate({
         path: "availableAccessories.defect",
+        select: "-image",
         // select: "name",
       });
 
@@ -317,7 +326,7 @@ export const calculateDefectsPrice = async (req, res) => {
     if (!warrantyFound) {
       warrantyPercent = Number(WARRANTY["Above 11 months"]); // 20%
     }
-    
+
     const warrantyPrice = Math.round(
       ramStoragePrice * (1 - warrantyPercent / 100)
     );
