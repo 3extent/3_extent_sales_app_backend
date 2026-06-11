@@ -33,7 +33,7 @@ export const getModels = async (req, res) => {
     console.log("filter", filter)
     const models = await Model.find(filter)
       // exclude images from Model
-      .select("-id name thumbnailBase64")
+      .select("_id name thumbnailBase64")
       // populate defects and exclude image from each defect
 
     res.json(models);
@@ -61,6 +61,7 @@ export const getModelsList = async (req, res) => {
     const models = await Model.find(filter)
       // exclude images from Model
       .select("-image")
+      .select("-thumbnailBase64")
       // populate brand (if it has image, exclude them too)
       .populate({
         path: "brand",
@@ -115,7 +116,7 @@ export const getModelsList = async (req, res) => {
 export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
-    const model = await Model.findById(id)
+    const model = await Model.findById(id).select("-thumbnailBase64")
       .populate('brand')
       .populate('enquiryQuestions.defect')
       .populate('warranty.defect')

@@ -9,10 +9,7 @@ export const getBrands = async (req, res) => {
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
-    const brands = await Brand.find(filter).populate({
-      path: "defects",
-      select: "-image",
-    }).select("-image");
+    const brands = await Brand.find(filter).select("-image");
     res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
