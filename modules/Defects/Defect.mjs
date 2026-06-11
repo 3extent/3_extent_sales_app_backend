@@ -7,6 +7,7 @@ const defectSchema = new mongoose.Schema({
   question: String,
   description: String,
   image: String,
+  thumbnailBase64:String,
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() },
   type: String
