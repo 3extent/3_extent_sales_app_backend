@@ -33,7 +33,7 @@ export const getBrandsNames = async (req, res) => {
 
 export const addBrands = async (req, res) => {
   try {
-    const { name, image, possibleRamStorageComb, defects } = req.body;
+    const { name, image, thumbnailBase64, possibleRamStorageComb, defects } = req.body;
     const existingBrand = await Brand.findOne({ name });
     if (existingBrand) {
       return res.status(400).json({ error: 'Brand already exists' });
@@ -47,6 +47,7 @@ export const addBrands = async (req, res) => {
     const new_brand = new Brand({
       name,
       image,
+      thumbnailBase64,
       possibleRamStorageComb,
       defects: defectIds
     })

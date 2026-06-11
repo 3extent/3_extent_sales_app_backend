@@ -311,6 +311,7 @@ export const addModel = async (req, res) => {
     const {
       name,
       image,
+      thumbnailBase64,
       ramStorageComb,
       brand,
       enquiryQuestions = [],
@@ -377,6 +378,7 @@ export const addModel = async (req, res) => {
     const modelData = {
       name,
       image,
+      thumbnailBase64,
       ramStorageComb,
       brand: brandDoc._id,
       enquiryQuestions: await mapDefectsByName(enquiryQuestions),
