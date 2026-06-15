@@ -17,7 +17,16 @@ const WARRANTY = {
 
 export const getModels = async (req, res) => {
   try {
-    const { brand_name, name } = req.query;
+    const { brand_name, name, limit: limitStr, offset: offsetStr } = req.query;
+
+    const defaultLimit = 20;
+    const maxLimit = 20;
+    let limit = parseInt(limitStr);
+    if (isNaN(limit) || limit < 1) limit = defaultLimit;
+    if (limit > maxLimit) limit = maxLimit;
+
+    let offset = parseInt(offsetStr);
+    if (isNaN(offset) || offset < 0) offset = 0;
 
     let filter = {};
     if (name) {
@@ -34,7 +43,10 @@ export const getModels = async (req, res) => {
     const models = await Model.find(filter)
       // exclude images from Model
       .select("_id name thumbnailBase64")
-      // populate defects and exclude image from each defect
+      .skip(offset)
+      .limit(limit)
+      .lean();
+    // populate defects and exclude image from each defect
 
     res.json(models);
   } catch (err) {
