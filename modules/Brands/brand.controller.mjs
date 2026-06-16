@@ -3,13 +3,25 @@ import Defect from '../Defects/Defect.mjs';
 
 export const getBrands = async (req, res) => {
   try {
-    const { name } = req.query;
+    const { name, limit: limitStr, offset: offsetStr } = req.query;
+
+    const defaultLimit = 10;
+
+    let limit = parseInt(limitStr);
+    if (isNaN(limit) || limit < 1) limit = defaultLimit;
+
+
+    let offset = parseInt(offsetStr);
+    if (isNaN(offset) || offset < 0) offset = 0;
 
     let filter = {};
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
-    const brands = await Brand.find(filter).select("-image");
+    const brands = await Brand.find(filter).select("-image")
+      .skip(offset)
+      .limit(limit)
+      .lean();
     res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
