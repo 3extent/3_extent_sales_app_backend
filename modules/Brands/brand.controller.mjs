@@ -5,7 +5,7 @@ export const getBrands = async (req, res) => {
   try {
     const { name, limit: limitStr, offset: offsetStr } = req.query;
 
-    const defaultLimit = 10;
+    const defaultLimit = 2;
 
     let limit = parseInt(limitStr);
     if (isNaN(limit) || limit < 1) limit = defaultLimit;
