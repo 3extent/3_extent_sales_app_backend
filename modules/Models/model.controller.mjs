@@ -19,7 +19,7 @@ export const getModels = async (req, res) => {
   try {
     const { brand_name, name, limit: limitStr, offset: offsetStr } = req.query;
 
-    const defaultLimit = 20;
+    const defaultLimit = 10;
 
     let limit = parseInt(limitStr);
     if (isNaN(limit) || limit < 1) limit = defaultLimit;
