@@ -4,9 +4,11 @@ import mongoose from "mongoose";
 const modelSchema = new mongoose.Schema({
   name: String,
   image: String,
+  thumbnailBase64:String,
   ramStorageComb: [{ ramStorage: String, price: String }],
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
   enquiryQuestions: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
+  warranty: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   bodyDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   brokenScratchDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   screenDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
