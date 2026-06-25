@@ -5,7 +5,7 @@ export const getBrands = async (req, res) => {
   try {
     const { name, limit: limitStr, offset: offsetStr } = req.query;
 
-    const defaultLimit = 2;
+    const defaultLimit = 20;
 
     let limit = parseInt(limitStr);
     if (isNaN(limit) || limit < 1) limit = defaultLimit;
@@ -18,15 +18,21 @@ export const getBrands = async (req, res) => {
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
+    const totalCount = await Brand.countDocuments(filter);
     const brands = await Brand.find(filter).select("-image")
       .skip(offset)
       .limit(limit)
       .lean();
-    res.json(brands);
+      
+    res.json({
+      data: brands,
+      totalCount
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 export const getBrandsNames = async (req, res) => {
   try {

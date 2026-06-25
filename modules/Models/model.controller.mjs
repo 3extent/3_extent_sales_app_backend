@@ -19,11 +19,11 @@ export const getModels = async (req, res) => {
   try {
     const { brand_name, name, limit: limitStr, offset: offsetStr } = req.query;
 
-    const defaultLimit = 2;
-    
+    const defaultLimit = 20;
+
     let limit = parseInt(limitStr);
     if (isNaN(limit) || limit < 1) limit = defaultLimit;
-    
+
 
     let offset = parseInt(offsetStr);
     if (isNaN(offset) || offset < 0) offset = 0;
@@ -40,6 +40,7 @@ export const getModels = async (req, res) => {
       }
     }
     console.log("filter", filter)
+    const totalCount = await Model.countDocuments(filter);
     const models = await Model.find(filter)
       // exclude images from Model
       .select("_id name thumbnailBase64")
@@ -48,11 +49,19 @@ export const getModels = async (req, res) => {
       .lean();
     // populate defects and exclude image from each defect
 
-    res.json(models);
+
+    res.json({
+      data: models,
+      totalCount,
+      limit: limit,
+      offset: offset
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+
 
 export const getModelsList = async (req, res) => {
   try {
