@@ -18,7 +18,19 @@ const activitySchema = new mongoose.Schema({
     alternate_number: Number,
     type: { type: String }
   },
-  status: "String",
+  // status: "String",
+  status: {
+    type: String,
+    enum: [
+      "PENDING",
+      "ASSIGNED",
+      "ACCEPTED",
+      "REJECTED",
+      "APPROVED_PENDING",
+      "APPROVED"
+    ],
+    default: "PENDING"
+  },
   assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() }

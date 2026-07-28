@@ -6,7 +6,7 @@ import Partner from "../Partners/Partner.mjs";
 
 export const getActivitiess = async (req, res) => {
   try {
-    const { contact_number, model_name, selected_ram_storage, partner_name, assigned_to, status } = req.query;
+    const { contact_number, model_name, selected_ram_storage, partner_name, assigned_to, status, partner_id, } = req.query;
     let filter = {};
 
     if (selected_ram_storage) {
@@ -36,6 +36,21 @@ export const getActivitiess = async (req, res) => {
         filter.assigned_to = userDoc._id;
       }
     }
+
+    if (partner_id) {
+      const users = await User.find({
+        partner: partner_id
+      });
+
+      const userIds = users.map(
+        (user) => user._id
+      );
+
+      filter.user = {
+        $in: userIds
+      };
+    }
+
     if (partner_name) {
       let partnerDoc = await Partner.findOne({ name: { $regex: partner_name, $options: 'i' } });
       if (partnerDoc) {
@@ -69,7 +84,7 @@ export const getActivitiess = async (req, res) => {
 
 export const addActivity = async (req, res) => {
   try {
-    const { contact_number, model, defects, final_price, add_on_amount, ramStorage, selected_address } = req.body;
+    const { contact_number, model, defects, final_price, add_on_amount, ramStorage, selected_address, status } = req.body;
 
     const user = await User.findOne({ contact_number }).populate({ path: 'role' })
       .populate({ path: 'partner' });;
@@ -103,7 +118,8 @@ export const addActivity = async (req, res) => {
           selected_ram_storage: ramStorage,
           selected_address,
           user: user._id,
-          status: "PENDING"
+          // status: "PENDING"
+          status: status || "PENDING"
         });
 
         await activity.save();
@@ -134,7 +150,7 @@ export const addActivity = async (req, res) => {
 export const updateActivityStatus = async (req, res) => {
   try {
     const { activityId } = req.params;
-    const { status, assigned_to } = req.body;
+    const { status, assigned_to, final_price } = req.body;
 
     if (!status) {
       return res.status(400).json({
@@ -162,6 +178,13 @@ export const updateActivityStatus = async (req, res) => {
 
       activity.assigned_to = assigned_to;
     }
+    if (final_price !== undefined) {
+      activity.final_price = Number(final_price);
+
+      activity.total_amount =
+        Number(final_price) +
+        Number(activity.add_on_amount || 0);
+    }
 
     activity.status = status;
 
@@ -171,6 +194,8 @@ export const updateActivityStatus = async (req, res) => {
       message: "Activity status updated successfully",
       activityId: activity._id,
       status: activity.status,
+      final_price: activity.final_price,
+      total_amount: activity.total_amount,
       assigned_to: activity.assigned_to || null
     });
 
