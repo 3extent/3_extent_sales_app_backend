@@ -18,7 +18,7 @@ const activitySchema = new mongoose.Schema({
     alternate_number: Number,
     type: { type: String }
   },
-  // status: "String",
+
   status: {
     type: String,
     enum: [
@@ -26,7 +26,7 @@ const activitySchema = new mongoose.Schema({
       "ASSIGNED",
       "ACCEPTED",
       "REJECTED",
-      "APPROVED_PENDING",
+      "APPROVAL_PENDING",
       "APPROVED"
     ],
     default: "PENDING"

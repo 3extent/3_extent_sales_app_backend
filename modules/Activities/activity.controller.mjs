@@ -12,8 +12,15 @@ export const getActivitiess = async (req, res) => {
     if (selected_ram_storage) {
       filter.selected_ram_storage = selected_ram_storage;
     }
+   
     if (status) {
-      filter.status = status;
+      if (status === "PENDING FOR APPROVAL") {
+        filter.status = {
+          $in: ["PENDING", "APPROVAL_PENDING"]
+        };
+      } else {
+        filter.status = status;
+      }
     }
 
     if (model_name) {
