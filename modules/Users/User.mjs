@@ -5,6 +5,9 @@ const userSchema = new mongoose.Schema({
   name: String,
   contact_number: String,
   email_id: String,
+   firstName:String, 
+   lastName: String,
+   
 
   // 🔐 OTP fields
   otp: String,
@@ -17,7 +20,9 @@ const userSchema = new mongoose.Schema({
       area: String,
       land_mark: String,
       alternate_number: Number,
-      type: { type: String }
+      type: { type: String },
+      city: String,
+      state: String,
     }
   ],
 

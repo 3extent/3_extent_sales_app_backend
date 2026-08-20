@@ -270,3 +270,49 @@ export const getAllUsers = async (req, res) => {
     });
   }
 };
+
+
+// udpdate personal details
+export const updatePersonalDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { firstName, lastName, email} = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Personal Details
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.name = `${firstName} ${lastName}`;
+
+    if (email) {
+      user.email_id = email;
+    }
+
+    user.updated_at = moment.utc().valueOf();
+
+    await user.save();
+
+    const updatedUser = await User.findById(user._id)
+      .populate("role")
+      .populate("partner");
+
+    return res.status(200).json({
+      message: "Personal details updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("UPDATE PERSONAL DETAILS ERROR:", err);
+
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};

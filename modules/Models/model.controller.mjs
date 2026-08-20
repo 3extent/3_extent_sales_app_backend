@@ -137,17 +137,48 @@ export const getModelsList = async (req, res) => {
 export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
+    const { mobile } = req.query;
+    const defectSelect = mobile === "true"
+      ? "-image -thumbnailBase64"
+      : "";
     const model = await Model.findById(id).select("-thumbnailBase64")
       .populate('brand')
-      .populate('enquiryQuestions.defect')
-      .populate('warranty.defect')
-      .populate('bodyDefects.defect')
-      .populate('brokenScratchDefects.defect')
-      .populate('screenDefects.defect')
-      .populate('scrachesBodyDefect.defect')
-      .populate('devicePanelMissing.defect')
-      .populate('functionalDefects.defect')
-      .populate('availableAccessories.defect');
+      .populate({
+        path: "enquiryQuestions.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "warranty.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "bodyDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "brokenScratchDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "screenDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "scrachesBodyDefect.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "devicePanelMissing.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "functionalDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "availableAccessories.defect",
+        select: defectSelect
+      });
 
     if (!model) {
       return res.status(404).json({ error: 'Model not found' });
