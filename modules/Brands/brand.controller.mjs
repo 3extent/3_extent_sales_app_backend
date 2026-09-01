@@ -3,18 +3,36 @@ import Defect from '../Defects/Defect.mjs';
 
 export const getBrands = async (req, res) => {
   try {
-    const { name } = req.query;
+    const { name, limit: limitStr, offset: offsetStr } = req.query;
+
+    const defaultLimit = 10;
+
+    let limit = parseInt(limitStr);
+    if (isNaN(limit) || limit < 1) limit = defaultLimit;
+
+
+    let offset = parseInt(offsetStr);
+    if (isNaN(offset) || offset < 0) offset = 0;
 
     let filter = {};
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
-    const brands = await Brand.find(filter).populate("defects");
-    res.json(brands);
+    const totalCount = await Brand.countDocuments(filter);
+    const brands = await Brand.find(filter).select("-image")
+      .skip(offset)
+      .limit(limit)
+      .lean();
+      
+    res.json({
+      data: brands,
+      totalCount
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 export const getBrandsNames = async (req, res) => {
   try {
@@ -33,7 +51,7 @@ export const getBrandsNames = async (req, res) => {
 
 export const addBrands = async (req, res) => {
   try {
-    const { name, image, possibleRamStorageComb, defects } = req.body;
+    const { name, image, thumbnailBase64, possibleRamStorageComb, defects } = req.body;
     const existingBrand = await Brand.findOne({ name });
     if (existingBrand) {
       return res.status(400).json({ error: 'Brand already exists' });
@@ -47,6 +65,7 @@ export const addBrands = async (req, res) => {
     const new_brand = new Brand({
       name,
       image,
+      thumbnailBase64,
       possibleRamStorageComb,
       defects: defectIds
     })

@@ -8,7 +8,7 @@ export const getDefects = async (req, res) => {
     if (type) {
       filter.type = type;
     }
-    const defects = await Defect.find(filter);
+    const defects = await Defect.find(filter).select("-image");;
     res.json(defects);
   } catch (err) {
     res.status(500).json({ error: err.message });

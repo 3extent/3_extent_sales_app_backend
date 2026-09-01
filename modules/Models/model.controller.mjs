@@ -6,9 +6,27 @@ import Defect from '../Defects/Defect.mjs';
 /**
  * GET /api/models
  */
+
+const WARRANTY = {
+  "Below 3 months": 0,
+  "3 months - 6 months": 10,
+  "6 months - 11 months": 15,
+  "Above 11 months": 20,
+  "None": 20
+}
+
 export const getModels = async (req, res) => {
   try {
-    const { brand_name, name } = req.query;
+    const { brand_name, name, limit: limitStr, offset: offsetStr } = req.query;
+
+    const defaultLimit = 10;
+
+    let limit = parseInt(limitStr);
+    if (isNaN(limit) || limit < 1) limit = defaultLimit;
+
+
+    let offset = parseInt(offsetStr);
+    if (isNaN(offset) || offset < 0) offset = 0;
 
     let filter = {};
     if (name) {
@@ -22,53 +40,28 @@ export const getModels = async (req, res) => {
       }
     }
     console.log("filter", filter)
+    const totalCount = await Model.countDocuments(filter);
     const models = await Model.find(filter)
       // exclude images from Model
-      // .select("-image")
-      // populate brand (if it has image, exclude them too)
-      .populate({
-        path: "brand",
-        // select: "name",
-      })
-      // populate defects and exclude image from each defect
-      .populate({
-        path: "enquiryQuestions.defect",
-        // select: "question description",
-      })
-      .populate({
-        path: "bodyDefects.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "brokenScratchDefects.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "screenDefects.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "scrachesBodyDefect.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "devicePanelMissing.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "functionalDefects.defect",
-        // select: "name",
-      })
-      .populate({
-        path: "availableAccessories.defect",
-        // select: "name",
-      });
+      .select("_id name thumbnailBase64")
+      .skip(offset)
+      .limit(limit)
+      .lean();
+    // populate defects and exclude image from each defect
 
-    res.json(models);
+
+    res.json({
+      data: models,
+      totalCount,
+      limit: limit,
+      offset: offset
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+
 
 export const getModelsList = async (req, res) => {
   try {
@@ -89,6 +82,7 @@ export const getModelsList = async (req, res) => {
     const models = await Model.find(filter)
       // exclude images from Model
       .select("-image")
+      .select("-thumbnailBase64")
       // populate brand (if it has image, exclude them too)
       .populate({
         path: "brand",
@@ -98,7 +92,9 @@ export const getModelsList = async (req, res) => {
       .populate({
         path: "enquiryQuestions.defect",
         select: "-image"
-        // select: "question description",
+      })
+      .populate({
+        path: "warranty.defect",
       })
       .populate({
         path: "bodyDefects.defect",
@@ -141,16 +137,48 @@ export const getModelsList = async (req, res) => {
 export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
-    const model = await Model.findById(id)
+    const { mobile } = req.query;
+    const defectSelect = mobile === "true"
+      ? "-image -thumbnailBase64"
+      : "";
+    const model = await Model.findById(id).select("-thumbnailBase64")
       .populate('brand')
-      .populate('enquiryQuestions.defect')
-      .populate('bodyDefects.defect')
-      .populate('brokenScratchDefects.defect')
-      .populate('screenDefects.defect')
-      .populate('scrachesBodyDefect.defect')
-      .populate('devicePanelMissing.defect')
-      .populate('functionalDefects.defect')
-      .populate('availableAccessories.defect');
+      .populate({
+        path: "enquiryQuestions.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "warranty.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "bodyDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "brokenScratchDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "screenDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "scrachesBodyDefect.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "devicePanelMissing.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "functionalDefects.defect",
+        select: defectSelect
+      })
+      .populate({
+        path: "availableAccessories.defect",
+        select: defectSelect
+      });
 
     if (!model) {
       return res.status(404).json({ error: 'Model not found' });
@@ -175,9 +203,9 @@ export const calculateDefectsPrice = async (req, res) => {
       });
     }
 
-    // Fetch model with all defect references populated
     const model = await Model.findById(modelId)
       .populate("enquiryQuestions.defect")
+      .populate("warranty.defect")
       .populate("bodyDefects.defect")
       .populate("brokenScratchDefects.defect")
       .populate("screenDefects.defect")
@@ -190,9 +218,9 @@ export const calculateDefectsPrice = async (req, res) => {
       return res.status(404).json({ error: "Model not found" });
     }
 
-    // Combine all defect arrays
     const defectArrays = [
       model.enquiryQuestions || [],
+      model.warranty || [],
       model.bodyDefects || [],
       model.brokenScratchDefects || [],
       model.screenDefects || [],
@@ -202,33 +230,33 @@ export const calculateDefectsPrice = async (req, res) => {
       model.availableAccessories || []
     ];
 
+    let totalDefectPrice = 0;
+    let matchedDefects = [];
     let ramStoragePrice = 0;
 
+    // ✅ Get base price from RAM/Storage
     if (ramStorage && Array.isArray(model.ramStorageComb)) {
-      const ramStorageEntry = model.ramStorageComb.find(
+      const entry = model.ramStorageComb.find(
         comb => comb.ramStorage === ramStorage
       );
-
-      if (ramStorageEntry?.price) {
-        ramStoragePrice = parseFloat(ramStorageEntry.price) || 0;
+      if (entry?.price) {
+        ramStoragePrice = Number(entry.price) || 0;
       }
     }
 
-    // 🔥 STEP 1: If deadMobile exists → override everything
+    // 🔥 STEP 1: deadMobile override
     if (defects.includes("deadMobile")) {
-
       for (const arr of defectArrays) {
         const match = arr.find(
-          entry => entry.defect && entry.defect.name === "deadMobile"
+          entry => entry.defect?.name === "deadMobile"
         );
 
         if (match) {
-          const deadPrice = parseFloat(match.price) || 0;
+          const deadPrice = Number(match.price) || 0;
 
           return res.json({
             totalPrice: deadPrice,
             totalDefectPrice: deadPrice,
-            ramStoragePrice,
             defects: [{
               defectName: "deadMobile",
               price: deadPrice
@@ -243,30 +271,46 @@ export const calculateDefectsPrice = async (req, res) => {
       });
     }
 
-    // 🔥 STEP 2: Normal defect calculation
-    let totalDefectPrice = 0;
-    let matchedDefects = [];
+    // 🔥 STEP 2: Process defects
+    let warrantyPercent = 0;
+    let warrantyFound = false;
 
     for (const defectName of defects) {
+
+      // ✅ Warranty handling
+      if (WARRANTY.hasOwnProperty(defectName)) {
+        const percent = Number(WARRANTY[defectName]) || 0;
+
+        // take max warranty benefit
+        warrantyPercent = Math.max(warrantyPercent, percent);
+        warrantyFound = true;
+
+        matchedDefects.push({
+          defectName,
+          percent,
+          type: "warranty"
+        });
+
+        continue;
+      }
+
+      // ✅ Normal defects
       let found = false;
 
       for (const arr of defectArrays) {
         const match = arr.find(
-          entry => entry.defect && entry.defect.name === defectName
+          entry => entry.defect?.name === defectName
         );
 
         if (match) {
-          const priceValue = parseFloat(match.price);
+          const priceValue = Number(match.price) || 0;
 
           matchedDefects.push({
             defectName,
-            price: match.price
+            price: priceValue
           });
 
-          if (!isNaN(priceValue)) {
-            totalDefectPrice += priceValue;
-          }
-
+          totalDefectPrice += priceValue;
           found = true;
           break;
         }
@@ -281,13 +325,27 @@ export const calculateDefectsPrice = async (req, res) => {
       }
     }
 
-    // 🔥 STEP 4: Final price calculation
-    const calculatedTotalPrice = ramStoragePrice - totalDefectPrice;
+    // 🔥 STEP 3: Apply warranty ONCE
+
+    if (!warrantyFound) {
+      warrantyPercent = Number(WARRANTY["Above 11 months"]); // 20%
+    }
+
+    const warrantyPrice = Math.round(
+      ramStoragePrice * (1 - warrantyPercent / 100)
+    );
+
+    // 🔥 STEP 4: Final price
+    const totalPrice = warrantyPrice - totalDefectPrice;
 
     return res.json({
-      totalPrice: calculatedTotalPrice,
+      basePrice: ramStoragePrice,
+      warranty: {
+        percent: warrantyPercent,
+        priceAfterWarranty: warrantyPrice
+      },
       totalDefectPrice,
-      ramStoragePrice,
+      totalPrice,
       defects: matchedDefects,
       deadMobileApplied: false
     });
@@ -305,9 +363,11 @@ export const addModel = async (req, res) => {
     const {
       name,
       image,
+      thumbnailBase64,
       ramStorageComb,
       brand,
       enquiryQuestions = [],
+      warranty = [],
       bodyDefects = [],
       brokenScratchDefects = [],
       screenDefects = [],
@@ -370,9 +430,11 @@ export const addModel = async (req, res) => {
     const modelData = {
       name,
       image,
+      thumbnailBase64,
       ramStorageComb,
       brand: brandDoc._id,
       enquiryQuestions: await mapDefectsByName(enquiryQuestions),
+      warranty: await mapDefectsByName(warranty),
       bodyDefects: await mapDefectsByName(bodyDefects),
       brokenScratchDefects: await mapDefectsByName(brokenScratchDefects),
       screenDefects: await mapDefectsByName(screenDefects),
@@ -429,3 +491,44 @@ export const updateModel = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+export const getModelNameAndId = async (req, res) => {
+  try {
+    const { brand_name, name } = req.query;
+
+    let filter = {};
+
+    if (name) {
+      filter.name = { $regex: name, $options: "i" };
+    }
+
+    if (brand_name) {
+      const brandDoc = await Brand.findOne({
+        name: { $regex: new RegExp("^" + brand_name + "$", "i") }
+      });
+
+      if (brandDoc) {
+        filter.brand = brandDoc._id;
+      } else {
+        return res.json([]);
+
+      }
+    }
+
+    const models = await Model.find(filter)
+      .select("_id name")
+      .sort({ name: 1 });
+
+
+    res.json(models);
+    console.log('models: ', models);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+
