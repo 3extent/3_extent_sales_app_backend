@@ -1,5 +1,6 @@
 import Brand from './Brand.mjs';
 import Defect from '../Defects/Defect.mjs';
+import Model from '../Models/Model.mjs';
 
 export const getBrands = async (req, res) => {
   try {
@@ -20,10 +21,11 @@ export const getBrands = async (req, res) => {
     }
     const totalCount = await Brand.countDocuments(filter);
     const brands = await Brand.find(filter).select("-image")
+      .sort({ clickCount: -1, name: 1 })
       .skip(offset)
       .limit(limit)
       .lean();
-      
+
     res.json({
       data: brands,
       totalCount
@@ -42,7 +44,8 @@ export const getBrandsNames = async (req, res) => {
     if (name) {
       filter.name = { $regex: name, $options: 'i' };
     }
-    const brands = await Brand.find(filter).select('name');
+    const brands = await Brand.find(filter).select('name')
+      .sort({ clickCount: -1, name: 1 });
     res.json(brands);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -78,3 +81,58 @@ export const addBrands = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 }
+
+export const trackClick = async (req, res) => {
+  try {
+    const { type, id } = req.body;
+
+    if (!type || !id) {
+      return res.status(400).json({
+        error: 'type and id are required'
+      });
+    }
+
+    if (type === 'brand') {
+      const brand = await Brand.findByIdAndUpdate(
+        id,
+        { $inc: { clickCount: 1 } },
+        { new: true }
+      );
+
+      if (!brand) {
+        return res.status(404).json({
+          error: 'Brand not found'
+        });
+      }
+
+      return res.json({
+        message: 'Brand click tracked successfully',
+        clickCount: brand.clickCount
+      });
+    }
+
+    if (type === 'model') {
+      const model = await Model.findByIdAndUpdate(
+        id,
+        { $inc: { clickCount: 1 } },
+        { new: true }
+      );
+
+      if (!model) {
+        return res.status(404).json({
+          error: 'Model not found'
+        });
+      }
+
+      return res.json({
+        message: 'Model click tracked successfully',
+        clickCount: model.clickCount
+      });
+    }
+
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
