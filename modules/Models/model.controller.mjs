@@ -42,6 +42,7 @@ export const getModels = async (req, res) => {
     console.log("filter", filter)
     const totalCount = await Model.countDocuments(filter);
     const models = await Model.find(filter)
+      .sort({ clickCount: -1, name: 1 })
       // exclude images from Model
       .select("_id name thumbnailBase64")
       .skip(offset)
@@ -526,6 +527,69 @@ export const getModelNameAndId = async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+
+export const getModelByDeviceName = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    console.log('==============================');
+    console.log('DEVICE MODEL NAME FROM APP:', name);
+    console.log('==============================');
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Model name is required',
+      });
+    }
+
+    // Clean model name
+    const cleanName = String(name)
+      .replace(/\u00A0/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    console.log('CLEAN MODEL NAME:', cleanName);
+
+    const models = await Model.find({
+      name: {
+        $regex: cleanName,
+        $options: 'i',
+      },
+    });
+
+    console.log('DEVICE NAME SEARCH RESULT:', models);
+
+    if (!models || models.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Model not found',
+        searchedName: cleanName,
+      });
+    }
+
+    const model = models[0];
+
+    console.log('MATCHED MODEL NAME:', model.name);
+    console.log('MATCHED MODEL ID:', model._id);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        _id: model._id,
+        name: model.name,
+      },
+    });
+  } catch (error) {
+    console.log('GET MODEL BY DEVICE NAME ERROR:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+    });
   }
 };
 
