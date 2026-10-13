@@ -62,6 +62,7 @@ async function connectToDB() {
   }
 }
 
+
 // Start server
 (async () => {
   try {
