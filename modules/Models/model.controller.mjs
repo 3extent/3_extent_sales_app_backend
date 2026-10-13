@@ -534,11 +534,6 @@ export const getModelNameAndId = async (req, res) => {
 export const getModelByDeviceName = async (req, res) => {
   try {
     const { name } = req.query;
-
-    console.log('==============================');
-    console.log('DEVICE MODEL NAME FROM APP:', name);
-    console.log('==============================');
-
     if (!name) {
       return res.status(400).json({
         success: false,
@@ -552,16 +547,12 @@ export const getModelByDeviceName = async (req, res) => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    console.log('CLEAN MODEL NAME:', cleanName);
-
     const models = await Model.find({
       name: {
         $regex: cleanName,
         $options: 'i',
       },
     });
-
-    console.log('DEVICE NAME SEARCH RESULT:', models);
 
     if (!models || models.length === 0) {
       return res.status(404).json({
@@ -572,10 +563,6 @@ export const getModelByDeviceName = async (req, res) => {
     }
 
     const model = models[0];
-
-    console.log('MATCHED MODEL NAME:', model.name);
-    console.log('MATCHED MODEL ID:', model._id);
-
     return res.status(200).json({
       success: true,
       data: {
@@ -584,8 +571,6 @@ export const getModelByDeviceName = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log('GET MODEL BY DEVICE NAME ERROR:', error);
-
     return res.status(500).json({
       success: false,
       message: 'Something went wrong',
