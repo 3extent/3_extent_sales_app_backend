@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const modelSchema = new mongoose.Schema({
   name: String,
   image: String,
-  thumbnailBase64:String,
+  thumbnailBase64: String,
   ramStorageComb: [{ ramStorage: String, price: String }],
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
   enquiryQuestions: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
@@ -16,6 +16,10 @@ const modelSchema = new mongoose.Schema({
   devicePanelMissing: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   functionalDefects: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
   availableAccessories: [{ defect: { type: mongoose.Schema.Types.ObjectId, ref: 'Defect' }, price: String }],
+  clickCount: {
+    type: Number,
+    default: 0
+  },
   created_at: { type: Number, default: moment.utc().valueOf() },
   updated_at: { type: Number, default: moment.utc().valueOf() }
 });

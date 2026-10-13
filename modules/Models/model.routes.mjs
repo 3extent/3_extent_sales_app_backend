@@ -7,6 +7,7 @@ import {
   calculateDefectsPrice,
   updateModel,
   getModelNameAndId,
+  getModelByDeviceName,
   
 } from './model.controller.mjs';
 import { verifyToken } from '../../middlewares/authMiddleware.mjs';
@@ -18,6 +19,7 @@ router.get('/', getModels);
 
 router.get('/list', getModelsList);
 
+router.get('/by-device-name', getModelByDeviceName);
 router.get('/:id', getModelById);
 router.post('/', verifyToken, addModel);
 router.post('/calculate-defects-price', verifyToken, calculateDefectsPrice);

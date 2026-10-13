@@ -1,5 +1,5 @@
 import express from 'express';
-import { addBrands, getBrands, getBrandsNames } from './brand.controller.mjs';
+import { addBrands, getBrands, getBrandsNames, trackClick } from './brand.controller.mjs';
 import { verifyToken } from '../../middlewares/authMiddleware.mjs';
 
 const router = express.Router();
@@ -12,5 +12,7 @@ router.get('/list', getBrandsNames);
 
 // POST /api/brands/
 router.post('/', verifyToken, addBrands);
+// Post /api/brands/click
+router.post('/click', trackClick);
 
 export default router;
